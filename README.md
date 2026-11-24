@@ -164,6 +164,12 @@ Ajoute l sou ekran telefòn ou (**Add to Home screen**), konsa l ap ouvri tankou
   ```
   Sit la ap mete tèt li ajou nan kèk minit, epi analiz ajan an ap ranplase analiz otomatik la.
 
+### Konte vizitè yo (GoatCounter)
+
+1. Kreye yon kont gratis sou **https://www.goatcounter.com/signup**. Chwazi yon **code** (pa egzanp `analisfoutbol`).
+2. Mete code la nan sekrè GitHub yo ak non `GOATCOUNTER_CODE`.
+3. Lanse workflow la. Estatistik yo ap parèt sou `https://<code>.goatcounter.com`.
+
 ### Si yon bagay pa mache
 
 Nan onglet **Actions**, klike sou dènye lansman an pou w li mesaj erè a. Kopye l voye ban mwen.

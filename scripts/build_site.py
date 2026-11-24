@@ -158,6 +158,16 @@ document.querySelectorAll('.chip').forEach(b=>b.onclick=()=>{{document.querySele
 </script></body></html>"""
 
 
+def analytics_tag():
+    """Kòd GoatCounter pou konte vizitè yo (si GOATCOUNTER_CODE la konfigire)."""
+    import re
+    from config import load_env
+    code = (load_env().get("GOATCOUNTER_CODE") or "").strip().lower()
+    if not re.fullmatch(r"[a-z0-9-]{2,50}", code):
+        return ""
+    return f'<script data-goatcounter="https://{code}.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>'
+
+
 BACK_LINK = '<a href="../index.html" style="display:inline-block;margin:12px 0 0 12px;color:#1f6feb;text-decoration:none">← Tout match yo</a>'
 
 
@@ -175,7 +185,7 @@ def main():
             continue
         ctx_path = CONTEXT_DIR / f"{a['slug']}.json"
         ctx = json.loads(ctx_path.read_text(encoding="utf-8")) if ctx_path.exists() else {}
-        html = build(a, ctx).replace("<main>", "<main>" + BACK_LINK, 1)
+        html = build(a, ctx).replace("<main>", "<main>" + BACK_LINK, 1).replace("</body>", analytics_tag() + "</body>", 1)
         (SITE_DIR / "m" / f"{a['slug']}.html").write_text(html, encoding="utf-8")
         comp_name = (EURO_COMPS.get(code) or ALL_DOMESTIC[code])["non"]
         comps[code] = comp_name
@@ -186,7 +196,9 @@ def main():
     order = list(EURO_COMPS) + list(LEAGUES)
     comps = {k: comps[k] for k in order if k in comps}
     updated = datetime.now().strftime("%d/%m/%Y %H:%M") + " UTC"
-    (SITE_DIR / "index.html").write_text(index_page(sorted(groups.items()), comps, updated), encoding="utf-8")
+    index = index_page(sorted(groups.items()), comps, updated).replace("</body>", analytics_tag() + "</body>", 1)
+    (SITE_DIR / "index.html").write_text(index, encoding="utf-8")
+    print("✓ Estatistik vizitè (GoatCounter) aktive" if analytics_tag() else "(GoatCounter pa konfigire)")
     (SITE_DIR / ".nojekyll").write_text("")
     print(f"\n✓ Sit la pare: {count} match nan {SITE_DIR}/index.html")
 
