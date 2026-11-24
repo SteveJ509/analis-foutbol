@@ -69,6 +69,23 @@ def absences(items):
     return '<ul class="abs">' + "".join(out) + "</ul>"
 
 
+DISCLAIMER = """
+<div class="disc" style="max-width:720px;margin:24px auto 0;padding:14px 16px;border-top:1px solid #8884;font-size:.78rem;line-height:1.5;color:#6b7280">
+<p style="margin:0 0 8px"><b>⚠️ Avètisman</b></p>
+<ul style="margin:0;padding-left:18px">
+<li><b>Nou pa ankouraje paryaj.</b> Sit sa a bay analiz estatistik pou enfòmasyon ak divètisman sèlman. Se pa yon konsèy pou parye ni yon konsèy finansye.</li>
+<li><b>Nou pa afilye ak okenn bookmaker</b> oswa sit paryaj. Nou pa resevwa okenn lajan, komisyon oswa piblisite nan men yo.</li>
+<li>Analiz yo <b>jenere otomatikman</b> pa yon modèl estatistik. Yo ka gen erè, epi done yo ka an reta oswa enkonplè (blesi, chanjman dènye minit...).</li>
+<li><b>Pa gen okenn garanti.</b> Pousantaj yo se estimasyon. Rezilta tès sou match ki deja jwe pa garanti rezilta pwochen match yo.</li>
+<li>Paryaj ka fè w pèdi lajan epi l ka vin yon depandans. Li entèdi pou moun ki poko gen laj legal nan peyi yo. Pa janm mize lajan ou pa ka pèdi.</li>
+<li>Si paryaj ap ba w pwoblèm, chèche èd. Nan Etazini, rele <b>1-800-GAMBLER</b> (gratis, konfidansyèl, 24/7).</li>
+<li>Sit sa a pa afilye ak okenn klib, lig, UEFA ni FIFA. Non ekip ak konpetisyon yo se pwopriyete mèt yo.</li>
+<li>Done: football-data.co.uk, football-data.org. Nou pa kolekte okenn done pèsonèl. Estatistik vizit yo anonim, san cookies.</li>
+</ul>
+<p id="vizit" style="margin:10px 0 0;text-align:center"></p>
+</div>"""
+
+
 def stars(n):
     return "★" * n + "☆" * (3 - n)
 
@@ -378,9 +395,8 @@ a{{color:var(--h)}}
 
 {f'<div class="card"><h2>🔗 Sous</h2><ul>{sources}</ul></div>' if sources else ''}
 
-<p class="foot">Kreye {e(a['kreye_le'])} · Done: football-data.co.uk + rechèch sou entènèt.<br>
-Pousantaj yo se estimasyon, pa garanti. Si w parye, pa janm mize plis pase sa w ka pèdi.</p>
-</main></body></html>"""
+<p class="foot">Kreye {e(a['kreye_le'])}</p>
+</main>{DISCLAIMER}</body></html>"""
 
 
 def build_index():

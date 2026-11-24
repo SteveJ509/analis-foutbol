@@ -12,7 +12,7 @@ from datetime import datetime, timedelta
 from html import escape
 
 import analyze_match as am
-from build_report import build, e
+from build_report import DISCLAIMER, build, e
 from config import ALL_DOMESTIC, CONTEXT_DIR, EURO_COMPS, LEAGUES, ROOT
 from config import RAW_DIR
 from datetime import timezone
@@ -140,14 +140,13 @@ input{{width:100%;padding:11px 14px;border-radius:12px;border:1px solid var(--li
 .nums{{display:flex;justify-content:space-between;font-weight:700;font-size:.9rem;margin-top:4px}}
 .meta{{font-size:.8rem;color:var(--muted);margin-top:6px}}.meta b{{color:var(--ink)}}.st{{color:#d4a72c}}
 .empty{{text-align:center;color:var(--muted);margin:40px 0}}
-footer{{text-align:center;font-size:.78rem;color:var(--muted);padding:20px 14px 40px;max-width:640px;margin:auto}}
+footer{{padding:0 14px 40px}}
 </style></head><body>
 <header><h1>⚽ Analiz Foutbòl</h1><div class="muted">Mete ajou: {e(updated)}{bt_line} · Klike sou yon match pou w wè analiz konplè a</div>
 <input id="q" type="search" placeholder="Chèche yon ekip…" autocomplete="off">
 <div class="chips">{chips}</div></header>
 <main id="list">{body}</main>
-<footer>Done: football-data.co.uk, football-data.org, API-Football. Pousantaj yo se estimasyon ki soti nan yon modèl estatistik, pa garanti.
-Si w parye, pa janm mize plis pase sa w ka pèdi.</footer>
+<footer>{DISCLAIMER}</footer>
 <script>
 let f='all';const q=document.getElementById('q');
 function run(){{const t=q.value.trim().toLowerCase();
@@ -165,7 +164,13 @@ def analytics_tag():
     code = (load_env().get("GOATCOUNTER_CODE") or "").strip().lower()
     if not re.fullmatch(r"[a-z0-9-]{2,50}", code):
         return ""
-    return f'<script data-goatcounter="https://{code}.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>'
+    counter = f"""<script>
+fetch('https://{code}.goatcounter.com/counter/TOTAL.json').then(r => r.ok ? r.json() : null).then(d => {{
+  const el = document.getElementById('vizit');
+  if (d && d.count && el) el.innerHTML = '👁️ <b>' + d.count + '</b> vizitè';
+}}).catch(() => {{}});
+</script>"""
+    return f'<script data-goatcounter="https://{code}.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>' + counter
 
 
 BACK_LINK = '<a href="../index.html" style="display:inline-block;margin:12px 0 0 12px;color:#1f6feb;text-decoration:none">← Tout match yo</a>'
