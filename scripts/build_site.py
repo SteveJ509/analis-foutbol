@@ -19,7 +19,7 @@ from datetime import timezone
 from footdata import all_teams, load_euro, load_fixtures, load_results, resolve_team
 
 SITE_DIR = ROOT / "site"
-INJURY_LIMIT = 30  # pou pa depase 100 demann API-Football pa jou (sit la mete ajou 2 fwa)
+INJURY_LIMIT = 20  # pou pa depase 100 demann API-Football pa jou (sit la mete ajou 2 fwa)
 
 
 def upcoming(days):

@@ -42,7 +42,7 @@ Ou pa bezwen enstale anyen ak `pip`. Pwojè a itilize sèlman sa ki deja vini ak
 
 ## 2. Champions League ak Europa League
 
-Sit football-data.co.uk pa gen koup Ewòp yo, kidonk ou bezwen kle gratis sou 2 lòt sit:
+Sit football-data.co.uk pa gen koup Ewòp yo. **Yon sèl kle API-Football ase** pou Champions League, Europa League ak kalandriye 5 chanpyona yo. Kle football-data.org la opsyonèl, men li itil si plan gratis API-Football la pa bay sezon kounye a:
 
 | Konpetisyon | Sous | Kle |
 |---|---|---|

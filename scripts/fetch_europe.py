@@ -109,6 +109,34 @@ def fetch_domestic_upcoming(token, days=10):
     print(f"  ✓ Kalandriye chanpyona yo: {len(out)} match k ap vini")
 
 
+# ID chanpyona yo nan API-Football -> kòd football-data.co.uk
+DOMESTIC_APIFOOTBALL = {39: "E0", 140: "SP1", 78: "D1", 61: "F1", 135: "I1"}
+
+
+def fetch_domestic_upcoming_apifootball(key, days=10):
+    """Menm bagay ak fetch_domestic_upcoming, men ak API-Football (5 demann)."""
+    from datetime import date, timedelta
+    today = date.today()
+    season = current_season_start()
+    out = []
+    for league_id, div in DOMESTIC_APIFOOTBALL.items():
+        url = (f"https://v3.football.api-sports.io/fixtures?league={league_id}&season={season}"
+               f"&from={today}&to={today + timedelta(days=days)}")
+        try:
+            data = get_json(url, {"x-apisports-key": key})
+            if data.get("errors"):
+                raise RuntimeError(data["errors"])
+        except Exception as e:  # noqa: BLE001
+            print(f"  ✗ Kalandriye {div}: {e}")
+            continue
+        for r in data.get("response", []):
+            if (r.get("fixture", {}).get("status") or {}).get("short") in ("NS", "TBD"):
+                out.append({"div": div, "dat": r["fixture"].get("date"),
+                            "lakay": r["teams"]["home"]["name"], "deyò": r["teams"]["away"]["name"]})
+    (RAW_DIR / "upcoming_domestic.json").write_text(json.dumps(out, ensure_ascii=False, indent=1), encoding="utf-8")
+    print(f"  ✓ Kalandriye chanpyona yo (API-Football): {len(out)} match k ap vini")
+
+
 def main():
     env = load_env()
     token = env.get("FOOTBALL_DATA_TOKEN")
@@ -145,6 +173,8 @@ def main():
                 print("      Europa League bezwen yon kle API-Football (APIFOOTBALL_KEY).")
     if token:
         fetch_domestic_upcoming(token)
+    elif key:
+        fetch_domestic_upcoming_apifootball(key)
     return 0 if ok else 1
 
 
