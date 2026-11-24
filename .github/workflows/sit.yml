@@ -1,12 +1,12 @@
 # Mete sit la ajou otomatikman sou GitHub Pages.
-# Li kouri chak jou a 09:17 ak 16:47 UTC, chak fwa w push sou main,
+# Li kouri chak jou a 06:17 ak 18:17 UTC, chak fwa w push sou main,
 # epi lè w klike "Run workflow" nan onglet Actions la.
 name: Mete sit la ajou
 
 on:
   schedule:
-    - cron: "17 9 * * *"
-    - cron: "47 16 * * *"
+    - cron: "17 6 * * *"
+    - cron: "17 18 * * *"
   push:
     branches: [main]
   workflow_dispatch:
@@ -38,6 +38,7 @@ jobs:
 
       - name: Analize match yo epi konstwi sit la
         env:
+          FOOTBALL_DATA_TOKEN: ${{ secrets.FOOTBALL_DATA_TOKEN }}
           APIFOOTBALL_KEY: ${{ secrets.APIFOOTBALL_KEY }}
         run: python3 scripts/build_site.py
 

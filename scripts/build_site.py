@@ -14,7 +14,9 @@ from html import escape
 import analyze_match as am
 from build_report import build, e
 from config import ALL_DOMESTIC, CONTEXT_DIR, EURO_COMPS, LEAGUES, ROOT
-from footdata import load_euro, load_fixtures
+from config import RAW_DIR
+from datetime import timezone
+from footdata import all_teams, load_euro, load_fixtures, load_results, resolve_team
 
 SITE_DIR = ROOT / "site"
 INJURY_LIMIT = 30  # pou pa depase 100 demann API-Football pa jou (sit la mete ajou 2 fwa)
@@ -27,6 +29,22 @@ def upcoming(days):
     for f in load_fixtures():
         if f["div"] in LEAGUES and start <= f["date"].replace(hour=23) and f["date"] <= end:
             out.append((f["date"], f["time"] + " UK", f["div"], f["home"], f["away"], None))
+    # Kalandriye football-data.org (si gen kle): match fixtures.csv poko genyen yo
+    path = RAW_DIR / "upcoming_domestic.json"
+    if path.exists():
+        teams = all_teams(load_results())
+        seen = {(x[2], x[3], x[4]) for x in out}
+        for r in json.loads(path.read_text(encoding="utf-8")):
+            try:
+                d = datetime.fromisoformat(r["dat"].replace("Z", "+00:00")).astimezone(timezone.utc).replace(tzinfo=None)
+            except (KeyError, ValueError, AttributeError):
+                continue
+            div_teams = {t: c for t, c in teams.items() if c == r["div"]}
+            h = resolve_team(r.get("lakay"), div_teams, cutoff=0.75)
+            a = resolve_team(r.get("deyò"), div_teams, cutoff=0.75)
+            if h and a and (r["div"], h, a) not in seen and start <= d <= end:
+                out.append((d, d.strftime("%H:%M") + " UTC", r["div"], h, a, None))
+                seen.add((r["div"], h, a))
     for code in EURO_COMPS:
         for f in load_euro(code)[1]:
             if start <= f["date"] <= end:
@@ -83,7 +101,9 @@ def index_page(groups, comps, updated):
     for d, cards in groups:
         body += f'<h2 class="day">{e(day_label(d))}</h2><div class="grid">{"".join(cards)}</div>'
     if not body:
-        body = '<p class="empty">Pa gen match nan jou k ap vini yo. Sit la ap mete ajou otomatikman.</p>'
+        body = ('<p class="empty">Pa gen match pou kounye a.<br>Kalandriye chanpyona yo parèt vandredi (pou wikenn nan) '
+                'ak madi (pou match nan mitan semèn nan). Ajoute kle API yo nan GitHub pou w wè Champions League, '
+                'Europa League ak kalandriye a pi bonè. Sit la ap mete ajou otomatikman.</p>')
     return f"""<!DOCTYPE html>
 <html lang="ht"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">

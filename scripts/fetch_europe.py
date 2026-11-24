@@ -81,6 +81,34 @@ def from_api_football(league_id, season, key):
     return out
 
 
+# Kòd football-data.org -> kòd football-data.co.uk
+DOMESTIC_FDORG = {"PL": "E0", "PD": "SP1", "BL1": "D1", "FL1": "F1", "SA": "I1"}
+
+
+def fetch_domestic_upcoming(token, days=10):
+    """Kalandriye match chanpyona k ap vini yo (lè fixtures.csv poko gen yo)."""
+    import time
+    from datetime import date, timedelta
+    today = date.today()
+    out = []
+    for code, div in DOMESTIC_FDORG.items():
+        url = (f"https://api.football-data.org/v4/competitions/{code}/matches"
+               f"?dateFrom={today}&dateTo={today + timedelta(days=days)}")
+        try:
+            data = get_json(url, {"X-Auth-Token": token})
+        except Exception as e:  # noqa: BLE001
+            print(f"  ✗ Kalandriye {code}: {e}")
+            continue
+        for m in data.get("matches", []):
+            if m.get("status") in ("SCHEDULED", "TIMED"):
+                out.append({"div": div, "dat": m.get("utcDate"),
+                            "lakay": (m.get("homeTeam") or {}).get("name"),
+                            "deyò": (m.get("awayTeam") or {}).get("name")})
+        time.sleep(7)  # plan gratis la: 10 demann pa minit
+    (RAW_DIR / "upcoming_domestic.json").write_text(json.dumps(out, ensure_ascii=False, indent=1), encoding="utf-8")
+    print(f"  ✓ Kalandriye chanpyona yo: {len(out)} match k ap vini")
+
+
 def main():
     env = load_env()
     token = env.get("FOOTBALL_DATA_TOKEN")
@@ -115,6 +143,8 @@ def main():
                 print(f"      {err}")
             if code == "EL" and not key:
                 print("      Europa League bezwen yon kle API-Football (APIFOOTBALL_KEY).")
+    if token:
+        fetch_domestic_upcoming(token)
     return 0 if ok else 1
 
 
