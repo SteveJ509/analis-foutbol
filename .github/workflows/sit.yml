@@ -41,7 +41,7 @@ jobs:
 
       - name: Analize match yo epi konstwi sit la
         env:
-          GOATCOUNTER_CODE: ${{ secrets.GOATCOUNTER_CODE }}
+          GOATCOUNTER_CODE: ${{ secrets.GOATCOUNTER_CODE || 'analisfoutbol' }}
           FOOTBALL_DATA_TOKEN: ${{ secrets.FOOTBALL_DATA_TOKEN }}
           APIFOOTBALL_KEY: ${{ secrets.APIFOOTBALL_KEY }}
         run: python3 scripts/build_site.py
