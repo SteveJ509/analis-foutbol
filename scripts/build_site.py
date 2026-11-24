@@ -204,7 +204,7 @@ def combos_section(combos, verified, start, end, bt, agent=None):
         legs = "".join(
             f'<li><a href="m/{escape(l["slug"])}.html"><span class="lm">{e(l["match"])}</span>'
             f'<span class="ln">{e(l["non"])}</span></a>'
-            f'<span class="lp">{l["pousantaj"]}%<small>{l["kòt_jis"]}</small></span>'
+            f'<span class="lp">{ {"✅": "✅ ", "❌": "❌ "}.get(l.get("rezilta", ""), "") }{l["pousantaj"]}%<small>{l["kòt_jis"]}</small></span>'
             f'{("<div class=\"note\">" + e(l["nòt"]) + "</div>") if l.get("nòt") else ""}</li>'
             for l in c["seleksyon"])
         html += f"""<details class="combo" {"open" if c is combos[0] else ""}>
@@ -215,6 +215,11 @@ def combos_section(combos, verified, start, end, bt, agent=None):
     if agent:
         if agent.get("rezime"):
             extra += f'<p class="small">{e(agent["rezime"])}</p>'
+        if agent.get("kreye_le"):
+            extra += f'<p class="muted small">Dènye mizajou: {e(agent["kreye_le"])}</p>'
+        if agent.get("istwa"):
+            extra += '<details class="small"><summary>Istwa chanjman yo</summary><ul>' + "".join(
+                f'<li><b>{e(h.get("lè"))}</b>: {e(h.get("chanjman"))}</li>' for h in reversed(agent["istwa"])) + "</ul></details>"
         if agent.get("retire"):
             extra += '<details class="small"><summary>Match ajan an retire</summary><ul>' + "".join(
                 f'<li><b>{e(r.get("match"))}</b>: {e(r.get("rezon"))}</li>' for r in agent["retire"]) + "</ul></details>"

@@ -2,7 +2,7 @@
 description: Fè 2 konbinezon wikenn yo (kòt ~5 ak kòt ~10) epi verifye blesi, teren ak enpòtans chak match
 ---
 
-Ou se yon parieur pwofesyonèl ki pridan. Pale an Kreyòl ayisyen. Pa janm envante yon blesi oswa yon nouvèl.
+Sèvi ak ajan `parieur-pro` la (`.claude/agents/parieur-pro.md`): swiv règ li yo ak lis bagay yon pro tcheke yo. Pale an Kreyòl ayisyen. Pa janm envante yon blesi oswa yon nouvèl.
 
 ## 1. Kandida yo
 ```bash
@@ -32,9 +32,10 @@ Pran nouvo seleksyon nan `rezèv` (yon sèl pa match, pa repete match ki deja na
 Ekri `data/context/konbinezon_draft.json`:
 ```json
 {
-  "k5": [{"slug": "...", "mache": "O1.5", "nòt": "Tou de atakan titilè yo la; pa gen lapli."}],
+  "k5": [{"slug": "...", "mache": "H_O0.5", "nòt": "Tou de atakan titilè yo la; pa gen lapli.", "rezilta": ""}],
   "k10": [{"slug": "...", "mache": "1X", "nòt": "..."}],
   "retire": [{"match": "Ekip A vs Ekip B", "rezon": "Premye bitè a blese, ekip la ap fè woulman"}],
+  "chanjman": "Kout: sa ki chanje nan mizajou sa a ak poukisa (vid si se premye vèsyon an)",
   "rezime": "2-3 fraz an Kreyòl sou konbinezon wikenn nan."
 }
 ```

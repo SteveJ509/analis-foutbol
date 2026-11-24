@@ -187,16 +187,30 @@ def finalize(path):
             if not leg:
                 print(f"  ✗ Pa jwenn {x['slug']} / {x['mache']} nan combo_auto.json — sote l")
                 continue
-            legs.append({**leg, "nòt": x.get("nòt", "")})
+            legs.append({**leg, "nòt": x.get("nòt", ""), "rezilta": x.get("rezilta", "")})
         if legs:
             odds = math.prod(l["kòt_jis"] for l in legs)
             chance = math.prod(l["pousantaj"] / 100 for l in legs)
             out.append({"id": t["id"], "non": t["non"], "sib": t["sib"], "seleksyon": legs, "kantite": len(legs),
                         "kòt_total": round(odds, 2), "chans": round(100 * chance, 1)})
             print(f"  ✓ {t['non']}: {len(legs)} seleksyon, kòt jis {odds:.2f}, chans {100 * chance:.1f}%")
+    # Istwa chanjman yo (pou moun ki deja parye konnen sa ki chanje e poukisa)
+    history = []
+    try:
+        old = json.loads(AGENT_PATH.read_text(encoding="utf-8"))
+        if old.get("fen") == auto["fen"]:
+            history = old.get("istwa", [])
+    except (OSError, ValueError):
+        pass
+    from datetime import timezone
+    now = datetime.now(timezone.utc).strftime("%d/%m/%Y %H:%M UTC")
+    if draft.get("chanjman"):
+        history.append({"lè": now, "chanjman": draft["chanjman"]})
+    elif not history:
+        history.append({"lè": now, "chanjman": "Premye vèsyon verifye"})
     final = {"kòmanse": auto["kòmanse"], "fen": auto["fen"], "verifye": True,
-             "kreye_le": datetime.now().strftime("%d/%m/%Y %H:%M"),
-             "konbinezon": out, "retire": draft.get("retire", []), "rezime": draft.get("rezime", "")}
+             "kreye_le": now, "konbinezon": out, "retire": draft.get("retire", []),
+             "rezime": draft.get("rezime", ""), "istwa": history}
     AGENT_PATH.parent.mkdir(parents=True, exist_ok=True)
     AGENT_PATH.write_text(json.dumps(final, ensure_ascii=False, indent=1), encoding="utf-8")
     print(f"✓ {AGENT_PATH}")
