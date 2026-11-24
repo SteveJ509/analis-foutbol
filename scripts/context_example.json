@@ -1,0 +1,39 @@
+{
+  "dat": "29/11/2026",
+  "lè": "15:00",
+  "estad": {
+    "non": "Emirates Stadium",
+    "vil": "London",
+    "teren": "Gazon natirèl ibrid, an bon kondisyon",
+    "kapasite": 60704
+  },
+  "move_tan": "10°C, ti lapli posib (40%), van 15 km/h",
+  "abit": "Michael Oliver",
+  "enpotans_match": "Derby Lond. Arsenal (4yèm) bezwen pwen pou rete nan 4 premye yo; Chelsea (1ye) ka ogmante avans li. Arsenal jwe Champions League madi, kidonk antrenè a ka fè woulman.",
+  "absans": {
+    "lakay": [
+      {"jwè": "Non Jwè", "pozisyon": "Defansè santral", "rezon": "Blesi jenou", "estati": "Konfime absan", "enpotans": "Kle — titilè chak match"},
+      {"jwè": "Non Jwè 2", "pozisyon": "Milye", "rezon": "Malad", "estati": "Dout", "enpotans": "Mwayen"}
+    ],
+    "deyò": [
+      {"jwè": "Non Jwè 3", "pozisyon": "Atakan", "rezon": "Suspann (5 kat jòn)", "estati": "Konfime absan", "enpotans": "Kle — premye bitè ekip la"}
+    ]
+  },
+  "pwen_kle": [
+    "Chelsea pran gòl nan 8 sou 10 dènye match yo",
+    "Arsenal fè plis kònè pase mwayèn chanpyona a lakay li",
+    "Absans atakan Chelsea a diminye menas li sou kontratak"
+  ],
+  "analiz": "Paragraf an Kreyòl ki eksplike match la: fòm, atak kont defans, absans, kontèks, epi sa chif yo vle di.",
+  "prediksyon_final": {
+    "metòd": "Konbine (modèl + mache) ajiste pou absans",
+    "lakay_genyen": 47.0,
+    "nil": 25.0,
+    "deyò_genyen": 28.0,
+    "rezon": "Nou ogmante chans Arsenal 4 pwen paske premye bitè Chelsea suspann."
+  },
+  "sous": [
+    {"tit": "Premier League — Injury news", "url": "https://www.premierleague.com/"},
+    {"tit": "BBC Sport — Arsenal v Chelsea preview", "url": "https://www.bbc.com/sport/football"}
+  ]
+}
