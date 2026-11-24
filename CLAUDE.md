@@ -9,6 +9,7 @@ Pwojè pou analize match nan 5 gran chanpyona Ewòp yo, Champions League ak Euro
 - Analiz: `scripts/analyze_match.py` (`--europe CL` oswa `--europe EL` pou koup yo)
 - Kontèks (blesi, estad, move tan, enpòtans): ajan `analis-foutbol` la chèche yo sou entènèt
 - Rapò HTML pou telefòn: `scripts/build_report.py` → `reports/`
+- Konbinezon wikenn: `scripts/combo.py` (kòt ~5 ak ~10, chak seleksyon ≥85%); kòmand `/konbinezon` pou ajan an verifye blesi/teren/enpòtans → `data/context/konbinezon.json`
 - Sit live: `scripts/build_site.py` → `site/`, pibliye pa `.github/workflows/sit.yml` (GitHub Actions, 2 fwa pa jou)
 - Kontèks ajan an ekri nan `data/context/` itilize pa sit la tou: commit epi push yo.
 

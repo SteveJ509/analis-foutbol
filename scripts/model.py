@@ -310,8 +310,8 @@ def recommend(mk, H, A, n_min, market_odds=None, bt=None, disagree=0.0):
 
 def all_markets_table(mk, H, A):
     order = ["1", "X", "2", "1X", "X2", "12", "DNB1", "DNB2",
-             "O0.5", "O1.5", "O2.5", "O3.5", "O4.5", "U1.5", "U2.5", "U3.5",
+             "O0.5", "O1.5", "O2.5", "O3.5", "O4.5", "U1.5", "U2.5", "U3.5", "U4.5",
              "BTTS", "BTTS_NO", "H_O0.5", "H_O1.5", "A_O0.5", "A_O1.5", "AH1-1.5", "AH2-1.5",
-             "C_O7.5", "C_O8.5", "C_O9.5", "C_O10.5", "C_O11.5", "C_U8.5", "C_U9.5", "C_U10.5"]
+             "C_O7.5", "C_O8.5", "C_O9.5", "C_O10.5", "C_O11.5", "C_U8.5", "C_U9.5", "C_U10.5", "C_U11.5"]
     return [{"mache": k, "non": label(k, H, A), "fanmi": family(k), "pousantaj": round(100 * mk[k], 1),
              "kòt_jis": round(1 / mk[k], 2) if mk[k] > 0.001 else None} for k in order if k in mk]

@@ -10,6 +10,7 @@ import json
 import math
 from datetime import timedelta
 
+import combo as C
 import model as M
 from config import LEAGUES
 from footdata import load_results
@@ -57,6 +58,7 @@ def run():
     value = {"paryaj": 0, "pwofi": 0.0, "genyen": 0}
     per_league = {}
     tested = 0
+    weekend = {}  # semèn -> lis (a, dat, rezilta) pou tès konbinezon yo
 
     for code, info in LEAGUES.items():
         matches = load_results(code).get(code, [])
@@ -85,6 +87,11 @@ def run():
                     corners = M.expected(cfit, m["home"], m["away"])
                 mk, _ = M.markets(lam, mu, gfit["rho"], corners)
                 tested += 1
+                if m["date"].weekday() in (4, 5, 6, 0):
+                    a = {"lakay": m["home"], "deyò": m["away"], "slug": f"{code}-{m['home']}-{m['away']}-{m['date']:%Y%m%d}",
+                         "chanpyona": {"non": info["non"]}, "tout_mache": M.all_markets_table(mk, m["home"], m["away"])}
+                    wkey = (m["date"] - timedelta(days=(m["date"].weekday() - 4) % 7)).date()
+                    weekend.setdefault(wkey, []).append((a, m))
 
                 # Kalibrasyon
                 for k, p in mk.items():
@@ -133,6 +140,31 @@ def run():
             per_league[info["non"]] = {"n": lg_n, "reyisi": round(100 * lg_hit / lg_n, 1)}
         print(f"  ✓ {info['non']}: {lg_n} match teste")
 
+    # Tès konbinezon wikenn yo: 5 chanpyona yo ansanm, menm règ ak sit la
+    combo_res = {t["id"]: {"wikenn": 0, "genyen": 0, "kòt": [], "seleksyon": 0, "seleksyon_genyen": 0} for t in C.TARGETS}
+    for wkey, items in sorted(weekend.items()):
+        if len(items) < 15:
+            continue
+        combos, _ = C.make_combos([(a, m["date"]) for a, m in items], bt={})
+        by_slug = {a["slug"]: m for a, m in items}
+        for c in combos:
+            r = combo_res[c["id"]]
+            ok = True
+            for leg in c["seleksyon"]:
+                m = by_slug[leg["slug"]]
+                o = outcome(leg["mache"], m["hg"], m["ag"], m["hc"], m["ac"])
+                r["seleksyon"] += 1
+                r["seleksyon_genyen"] += int(bool(o))
+                ok = ok and bool(o)
+            r["wikenn"] += 1
+            r["genyen"] += int(ok)
+            r["kòt"].append(c["kòt_total"])
+    for r in combo_res.values():
+        ks = r.pop("kòt")
+        r["kòt_mwayèn"] = round(sum(ks) / len(ks), 2) if ks else None
+        r["reyisi"] = round(100 * r["genyen"] / r["wikenn"], 1) if r["wikenn"] else None
+        r["seleksyon_reyisi"] = round(100 * r["seleksyon_genyen"] / r["seleksyon"], 1) if r["seleksyon"] else None
+
     best_w = min(ll, key=ll.get) / 10 if n_ll else 0.4
     out = {
         "match_teste": tested,
@@ -144,6 +176,7 @@ def run():
         "value": {**value, "pwofi": round(value["pwofi"], 1),
                   "roi": round(100 * value["pwofi"] / value["paryaj"], 1) if value["paryaj"] else None},
         "kalibrasyon": cal,
+        "konbinezon": combo_res,
     }
     M.BACKTEST_PATH.parent.mkdir(parents=True, exist_ok=True)
     M.BACKTEST_PATH.write_text(json.dumps(out, ensure_ascii=False), encoding="utf-8")
@@ -158,6 +191,9 @@ def run():
               f"melanj ({int(best_w * 100)}% modèl): {out['log_loss']['melanj']}  (pi ba = pi bon)")
     v = out["value"]
     print(f"Value bets: {v['paryaj']} paryaj, {v['genyen']} genyen, pwofi {v['pwofi']} inite, ROI {v['roi']}%")
+    for cid, r in combo_res.items():
+        print(f"Konbinezon {cid}: {r['genyen']}/{r['wikenn']} wikenn genyen ({r['reyisi']}%), kòt mwayèn {r['kòt_mwayèn']}, "
+              f"seleksyon yo pase {r['seleksyon_reyisi']}%")
     for k in ("O1.5", "O2.5", "BTTS"):
         for b in ("6", "7", "8"):
             c = cal.get(k, {}).get(b)

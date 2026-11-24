@@ -6,3 +6,4 @@ venv/
 site/
 data/analysis/
 data/backtest.json
+data/combo_auto.json

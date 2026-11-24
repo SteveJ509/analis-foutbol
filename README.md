@@ -191,6 +191,16 @@ Apre sa, nan aplikasyon **Files**, ale nan **Linux files → analis-foutbol → 
 - **Value bets:** lè kòt bookmaker a pi wo pase kòt jis la ak omwen 4%.
 - **Backtest:** chak mizajou, modèl la teste tèt li sou match ki deja jwe. Li sèvi ak rezilta tès sa yo pou l retire mache ki pa t mache byen, epi pou l bese etwal yo lè l twò optimis.
 
+## Konbinezon wikenn yo
+
+Anlè paj akèy la, sit la montre 2 konbinezon pou wikenn nan (5 gran chanpyona yo):
+- **Konbinezon pridan:** kòt jis anviwon 5
+- **Konbinezon kòt 10:** kòt jis anviwon 10, ak lòt match si posib
+
+Règ yo: chak seleksyon gen **omwen 85% chans** (apre korije ak backtest la), yon sèl seleksyon pa match, epi sèlman mache ki te mache byen nan tès la.
+
+Sit la fè yo **otomatikman**, men li pa konnen blesi yo. Pou verifye blesi, teren ak enpòtans match yo, lanse `/konbinezon` nan Claude Code. Ajan an ap retire seleksyon ki gen risk, ranplase yo, epi pibliye vèsyon ki verifye a ("✅ Verifye pa ajan an").
+
 ## Bagay pou w konnen
 
 - Pou match chanpyona, estatistik yo se match chanpyona sèlman. Pou match Ewòp, fòm nan gen tout konpetisyon.

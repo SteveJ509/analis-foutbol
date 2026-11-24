@@ -96,7 +96,7 @@ def day_label(d):
     return f"{DAYS_HT[d.weekday()]} {d.day} {MONTHS_HT[d.month]}"
 
 
-def index_page(groups, comps, updated):
+def index_page(groups, comps, updated, combos_html=""):
     import model as M
     bt = M.load_backtest()
     ch = (bt.get("chwa") or {}).get("tout") or {}
@@ -140,9 +140,24 @@ input{{width:100%;padding:11px 14px;border-radius:12px;border:1px solid var(--li
 .nums{{display:flex;justify-content:space-between;font-weight:700;font-size:.9rem;margin-top:4px}}
 .meta{{font-size:.8rem;color:var(--muted);margin-top:6px}}.meta b{{color:var(--ink)}}.st{{color:#d4a72c}}
 .empty{{text-align:center;color:var(--muted);margin:40px 0}}
+.wrap{{max-width:960px;margin:auto;padding:0 14px}}
+.combos{{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin:14px 0 4px}}
+.combos h2{{margin:0 0 8px;font-size:1.1rem}}
+.badge{{display:inline-block;font-size:.75rem;padding:3px 8px;border-radius:6px;margin-bottom:8px}}.badge.ok{{background:#2da44e22;color:#2da44e}}.badge.auto{{background:#bf870022;color:#bf8700}}
+.combo{{background:var(--bg);border-radius:12px;padding:10px 12px;margin:8px 0}}
+.combo summary{{display:flex;justify-content:space-between;align-items:center;cursor:pointer;list-style:none}}
+.combo summary::-webkit-details-marker{{display:none}}
+.ct{{text-align:right}}.ct b{{display:block;font-size:1.4rem;color:#2da44e}}.ct small{{color:var(--muted);font-size:.75rem}}
+.combo ol{{margin:10px 0 6px;padding-left:20px}}.combo li{{padding:6px 0;border-bottom:1px solid var(--line);position:relative;padding-right:64px}}
+.combo li a{{color:inherit;text-decoration:none}}.lm{{display:block;font-size:.8rem;color:var(--muted)}}.ln{{font-weight:600;font-size:.9rem}}
+.lp{{position:absolute;right:0;top:8px;text-align:right;font-weight:700;font-size:.9rem}}.lp small{{display:block;font-weight:400;color:var(--muted);font-size:.75rem}}
+.note{{font-size:.75rem;color:var(--muted)}}.small{{font-size:.78rem}}
 footer{{padding:0 14px 40px}}
 </style></head><body>
 <header><h1>⚽ Analiz Foutbòl</h1><div class="muted">Mete ajou: {e(updated)}{bt_line} · Klike sou yon match pou w wè analiz konplè a</div>
+</header>
+<div class="wrap">{combos_html}</div>
+<header style="padding-top:0">
 <input id="q" type="search" placeholder="Chèche yon ekip…" autocomplete="off">
 <div class="chips">{chips}</div></header>
 <main id="list">{body}</main>
@@ -173,6 +188,45 @@ fetch('https://{code}.goatcounter.com/counter/TOTAL.json').then(r => r.ok ? r.js
     return f'<script data-goatcounter="https://{code}.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>' + counter
 
 
+def combos_section(combos, verified, start, end, bt, agent=None):
+    if not combos:
+        return (f'<section class="combos"><h2>🎯 Konbinezon wikenn {start:%d/%m}–{end:%d/%m}</h2>'
+                '<p class="muted">Poko gen ase match ak seleksyon ≥85% pou wikenn sa a. Konbinezon yo ap parèt '
+                'lè kalandriye wikenn nan disponib.</p></section>')
+    tests = (bt or {}).get("konbinezon") or {}
+    badge = ('<span class="badge ok">✅ Verifye pa ajan an: blesi, teren, enpòtans</span>' if verified else
+             '<span class="badge auto">🤖 Otomatik: blesi ak nouvèl poko verifye</span>')
+    html = ""
+    for c in combos:
+        t = tests.get(c.get("id"), {})
+        test = (f'<div class="muted small">Tès sou wikenn ki pase yo: genyen <b>{t["genyen"]}</b> sou {t["wikenn"]} '
+                f'({t["reyisi"]}%) · seleksyon yo pase {t["seleksyon_reyisi"]}%</div>') if t.get("wikenn") else ""
+        legs = "".join(
+            f'<li><a href="m/{escape(l["slug"])}.html"><span class="lm">{e(l["match"])}</span>'
+            f'<span class="ln">{e(l["non"])}</span></a>'
+            f'<span class="lp">{l["pousantaj"]}%<small>{l["kòt_jis"]}</small></span>'
+            f'{("<div class=\"note\">" + e(l["nòt"]) + "</div>") if l.get("nòt") else ""}</li>'
+            for l in c["seleksyon"])
+        html += f"""<details class="combo" {"open" if c is combos[0] else ""}>
+  <summary><div><b>{e(c['non'])}</b><div class="muted small">{c['kantite']} seleksyon · chak ≥85%</div></div>
+  <div class="ct"><b>{c['kòt_total']}</b><small>{c['chans']}% chans</small></div></summary>
+  <ol>{legs}</ol>{test}</details>"""
+    extra = ""
+    if agent:
+        if agent.get("rezime"):
+            extra += f'<p class="small">{e(agent["rezime"])}</p>'
+        if agent.get("retire"):
+            extra += '<details class="small"><summary>Match ajan an retire</summary><ul>' + "".join(
+                f'<li><b>{e(r.get("match"))}</b>: {e(r.get("rezon"))}</li>' for r in agent["retire"]) + "</ul></details>"
+    return f"""<section class="combos">
+<h2>🎯 Konbinezon wikenn {start:%d/%m}–{end:%d/%m}</h2>{badge}
+{extra}
+{html}
+<p class="muted small">Kòt yo se <b>kòt jis</b> modèl la. Bookmaker ou a ap bay mwens: si kòt total li a pi ba anpil, konbinezon an pa vo lapenn.
+Menm ak 85% chans pou chak match, chans pou <b>tout</b> pase piti (gade pousantaj la). Pa mize plis pase sa w ka pèdi.</p>
+</section>"""
+
+
 BACK_LINK = '<a href="../index.html" style="display:inline-block;margin:12px 0 0 12px;color:#1f6feb;text-decoration:none">← Tout match yo</a>'
 
 
@@ -184,6 +238,7 @@ def main():
 
     (SITE_DIR / "m").mkdir(parents=True, exist_ok=True)
     groups, comps, count = {}, {}, 0
+    weekend_analyses = []
     for when, time_label, code, home, away, europe in upcoming(args.days):
         a = analyze_quiet(home, away, europe)
         if not a:
@@ -195,13 +250,28 @@ def main():
         comp_name = (EURO_COMPS.get(code) or ALL_DOMESTIC[code])["non"]
         comps[code] = comp_name
         groups.setdefault(when.date(), []).append(card(a, when, time_label, comp_name, code))
+        if code in LEAGUES:
+            weekend_analyses.append((a, when))
         count += 1
         print(f"  ✓ {comp_name}: {a['lakay']} vs {a['deyò']}")
+
+    # Konbinezon wikenn yo (5 chanpyona yo sèlman)
+    import combo as C
+    import model as M
+    start, end = C.weekend_window()
+    agent = C.load_agent_combos(start, end)
+    if agent:
+        combos, verified = agent.get("konbinezon", []), True
+    else:
+        combos, _ = C.make_combos([(a, w) for a, w in weekend_analyses if start <= w <= end])
+        verified = False
+    print(f"✓ Konbinezon: {len(combos)} ({'ajan an' if verified else 'otomatik'})")
+    combos_html = combos_section(combos, verified, start, end, M.load_backtest(), agent)
 
     order = list(EURO_COMPS) + list(LEAGUES)
     comps = {k: comps[k] for k in order if k in comps}
     updated = datetime.now().strftime("%d/%m/%Y %H:%M") + " UTC"
-    index = index_page(sorted(groups.items()), comps, updated).replace("</body>", analytics_tag() + "</body>", 1)
+    index = index_page(sorted(groups.items()), comps, updated, combos_html).replace("</body>", analytics_tag() + "</body>", 1)
     (SITE_DIR / "index.html").write_text(index, encoding="utf-8")
     print("✓ Estatistik vizitè (GoatCounter) aktive" if analytics_tag() else "(GoatCounter pa konfigire)")
     (SITE_DIR / ".nojekyll").write_text("")
