@@ -78,7 +78,6 @@ DISCLAIMER = """
 <li>Analiz yo <b>jenere otomatikman</b> pa yon modèl estatistik. Yo ka gen erè, epi done yo ka an reta oswa enkonplè (blesi, chanjman dènye minit...).</li>
 <li><b>Pa gen okenn garanti.</b> Pousantaj yo se estimasyon. Rezilta tès sou match ki deja jwe pa garanti rezilta pwochen match yo.</li>
 <li>Paryaj ka fè w pèdi lajan epi l ka vin yon depandans. Li entèdi pou moun ki poko gen laj legal nan peyi yo. Pa janm mize lajan ou pa ka pèdi.</li>
-<li>Si paryaj ap ba w pwoblèm, chèche èd. Nan Etazini, rele <b>1-800-GAMBLER</b> (gratis, konfidansyèl, 24/7).</li>
 <li>Sit sa a pa afilye ak okenn klib, lig, UEFA ni FIFA. Non ekip ak konpetisyon yo se pwopriyete mèt yo.</li>
 <li>Done: football-data.co.uk, football-data.org. Nou pa kolekte okenn done pèsonèl. Estatistik vizit yo anonim, san cookies.</li>
 </ul>
