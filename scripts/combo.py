@@ -47,6 +47,12 @@ def weekend_window(now=None):
 
 def calibrated(bt, key, p):
     """Pwobabilite pridan: pi piti ant modèl la ak sa ki te rive vre nan tès la."""
+    tab = (bt or {}).get("konbinezon_mache")
+    if tab is not None:
+        t = tab.get(key)
+        if not t or t["n"] < 30 or t["reyisi"] < 85:
+            return 0.0, None  # mache sa a pa t solid nan tès la: nou pa itilize l
+        return min(p, t["reyisi"] / 100), {"bann": "85-95%", "reyisi": t["reyisi"], "n": t["n"]}
     note = M.calibration_note(bt, key, p)
     if note:
         return min(p, note["reyisi"] / 100), note

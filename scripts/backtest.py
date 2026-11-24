@@ -142,12 +142,32 @@ def run():
         print(f"  ✓ {info['non']}: {lg_n} match teste")
 
     LAST["weekend"] = weekend
-    # Tès konbinezon wikenn yo: 5 chanpyona yo ansanm, menm règ ak sit la
+    # Tès konbinezon wikenn yo.
+    # 1) Sou 60% premye wikenn yo: ki mache ki vrèman pase ≥85% lè modèl la di 85-95%?
+    # 2) Sou 40% dènye wikenn yo (done modèl la pa t wè): nou teste konbinezon yo ak mache sa yo sèlman.
+    weeks = [w for w in sorted(weekend) if len(weekend[w]) >= 15]
+    cut = int(len(weeks) * 0.6)
+
+    def market_table(week_keys):
+        tab = {}
+        for wk in week_keys:
+            for a, m in weekend[wk]:
+                for r in a["tout_mache"]:
+                    k, p = r["mache"], r["pousantaj"] / 100
+                    if k in C.ALLOWED and C.MIN_P <= p <= C.MAX_P:
+                        o = outcome(k, m["hg"], m["ag"], m["hc"], m["ac"])
+                        if o is None:
+                            continue
+                        t = tab.setdefault(k, {"n": 0, "hit": 0})
+                        t["n"] += 1
+                        t["hit"] += int(o)
+        return {k: {"n": v["n"], "reyisi": round(100 * v["hit"] / v["n"], 1)} for k, v in tab.items()}
+
+    train_tab = market_table(weeks[:cut])
     combo_res = {t["id"]: {"wikenn": 0, "genyen": 0, "kòt": [], "seleksyon": 0, "seleksyon_genyen": 0} for t in C.TARGETS}
-    for wkey, items in sorted(weekend.items()):
-        if len(items) < 15:
-            continue
-        combos, _ = C.make_combos([(a, m["date"]) for a, m in items], bt={})
+    for wkey in weeks[cut:]:
+        items = weekend[wkey]
+        combos, _ = C.make_combos([(a, m["date"]) for a, m in items], bt={"konbinezon_mache": train_tab})
         by_slug = {a["slug"]: m for a, m in items}
         for c in combos:
             r = combo_res[c["id"]]
@@ -166,6 +186,7 @@ def run():
         r["kòt_mwayèn"] = round(sum(ks) / len(ks), 2) if ks else None
         r["reyisi"] = round(100 * r["genyen"] / r["wikenn"], 1) if r["wikenn"] else None
         r["seleksyon_reyisi"] = round(100 * r["seleksyon_genyen"] / r["seleksyon"], 1) if r["seleksyon"] else None
+    full_tab = market_table(weeks)  # pou sit la: tout wikenn yo
 
     best_w = min(ll, key=ll.get) / 10 if n_ll else 0.4
     out = {
@@ -179,6 +200,7 @@ def run():
                   "roi": round(100 * value["pwofi"] / value["paryaj"], 1) if value["paryaj"] else None},
         "kalibrasyon": cal,
         "konbinezon": combo_res,
+        "konbinezon_mache": full_tab,
     }
     M.BACKTEST_PATH.parent.mkdir(parents=True, exist_ok=True)
     M.BACKTEST_PATH.write_text(json.dumps(out, ensure_ascii=False), encoding="utf-8")
@@ -193,6 +215,9 @@ def run():
               f"melanj ({int(best_w * 100)}% modèl): {out['log_loss']['melanj']}  (pi ba = pi bon)")
     v = out["value"]
     print(f"Value bets: {v['paryaj']} paryaj, {v['genyen']} genyen, pwofi {v['pwofi']} inite, ROI {v['roi']}%")
+    print("Mache pou konbinezon (85-95% dapre modèl la):")
+    for k, v in sorted(full_tab.items(), key=lambda x: -x[1]["reyisi"]):
+        print(f"  {k:<8} pase {v['reyisi']}% (n={v['n']}) {'✓' if v['n'] >= 30 and v['reyisi'] >= 85 else '✗'}")
     for cid, r in combo_res.items():
         print(f"Konbinezon {cid}: {r['genyen']}/{r['wikenn']} wikenn genyen ({r['reyisi']}%), kòt mwayèn {r['kòt_mwayèn']}, "
               f"seleksyon yo pase {r['seleksyon_reyisi']}%")
