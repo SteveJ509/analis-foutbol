@@ -90,10 +90,10 @@ def fetch_domestic_upcoming(token, days=10):
     import time
     from datetime import date, timedelta
     today = date.today()
-    out = []
+    out, done = [], []
     for code, div in DOMESTIC_FDORG.items():
         url = (f"https://api.football-data.org/v4/competitions/{code}/matches"
-               f"?dateFrom={today}&dateTo={today + timedelta(days=days)}")
+               f"?dateFrom={today - timedelta(days=10)}&dateTo={today + timedelta(days=days)}")
         try:
             data = get_json(url, {"X-Auth-Token": token})
         except Exception as e:  # noqa: BLE001
@@ -104,8 +104,16 @@ def fetch_domestic_upcoming(token, days=10):
                 out.append({"div": div, "dat": m.get("utcDate"),
                             "lakay": (m.get("homeTeam") or {}).get("name"),
                             "deyò": (m.get("awayTeam") or {}).get("name")})
+            elif m.get("status") == "FINISHED":
+                ft = (m.get("score") or {}).get("fullTime") or {}
+                done.append({"div": div, "dat": m.get("utcDate"),
+                             "lakay": (m.get("homeTeam") or {}).get("name"),
+                             "deyò": (m.get("awayTeam") or {}).get("name"),
+                             "gòl_lakay": ft.get("home"), "gòl_deyò": ft.get("away")})
         time.sleep(7)  # plan gratis la: 10 demann pa minit
     (RAW_DIR / "upcoming_domestic.json").write_text(json.dumps(out, ensure_ascii=False, indent=1), encoding="utf-8")
+    (RAW_DIR / "recent_domestic.json").write_text(json.dumps(done, ensure_ascii=False, indent=1), encoding="utf-8")
+    print(f"  ✓ Rezilta resan yo: {len(done)} match fini")
     print(f"  ✓ Kalandriye chanpyona yo: {len(out)} match k ap vini")
 
 

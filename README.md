@@ -201,6 +201,10 @@ Règ yo: chak seleksyon gen **omwen 85% chans** (apre korije ak backtest la), yo
 
 Sit la fè yo **otomatikman**, men li pa konnen blesi yo. Pou verifye blesi, teren ak enpòtans match yo, lanse `/konbinezon` nan Claude Code. Ajan an ap retire seleksyon ki gen risk, ranplase yo, epi pibliye vèsyon ki verifye a ("✅ Verifye pa ajan an").
 
+## Rezilta ak ✅ / ❌
+
+Anvan chak match, sit la sove prediksyon yo nan `data/predictions/`. Yo bloke lè match la kòmanse, kidonk pèsonn pa ka chanje yo apre. Lè match la fini, paj match la montre skò final la ak ✅ (pase) oswa ❌ (pa pase) bò kote chak prediksyon. Paj akèy la gen yon seksyon **📋 Rezilta resan** ak total chwa ki te pase yo. ⏳ vle di nou ap tann done kònè yo.
+
 ## Bagay pou w konnen
 
 - Pou match chanpyona, estatistik yo se match chanpyona sèlman. Pou match Ewòp, fòm nan gen tout konpetisyon.

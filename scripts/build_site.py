@@ -12,6 +12,7 @@ from datetime import datetime, timedelta
 from html import escape
 
 import analyze_match as am
+import tracking as T
 from build_report import DISCLAIMER, build, e
 from config import ALL_DOMESTIC, CONTEXT_DIR, EURO_COMPS, LEAGUES, ROOT
 from config import RAW_DIR
@@ -96,7 +97,7 @@ def day_label(d):
     return f"{DAYS_HT[d.weekday()]} {d.day} {MONTHS_HT[d.month]}"
 
 
-def index_page(groups, comps, updated, combos_html=""):
+def index_page(groups, comps, updated, combos_html="", results_html=""):
     import model as M
     bt = M.load_backtest()
     ch = (bt.get("chwa") or {}).get("tout") or {}
@@ -141,6 +142,8 @@ input{{width:100%;padding:11px 14px;border-radius:12px;border:1px solid var(--li
 .meta{{font-size:.8rem;color:var(--muted);margin-top:6px}}.meta b{{color:var(--ink)}}.st{{color:#d4a72c}}
 .empty{{text-align:center;color:var(--muted);margin:40px 0}}
 .wrap{{max-width:960px;margin:auto;padding:0 14px}}
+.results{{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin:10px 0 4px}}.results summary{{cursor:pointer}}
+.rcard{{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:8px 4px;border-bottom:1px solid var(--line);color:inherit;text-decoration:none}}.rt{{flex:1;font-size:.9rem}}
 .combos{{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin:14px 0 4px}}
 .combos h2{{margin:0 0 8px;font-size:1.1rem}}
 .badge{{display:inline-block;font-size:.75rem;padding:3px 8px;border-radius:6px;margin-bottom:8px}}.badge.ok{{background:#2da44e22;color:#2da44e}}.badge.auto{{background:#bf870022;color:#bf8700}}
@@ -156,7 +159,7 @@ footer{{padding:0 14px 40px}}
 </style></head><body>
 <header><h1>⚽ Analiz Foutbòl</h1><div class="muted">Mete ajou: {e(updated)}{bt_line} · Klike sou yon match pou w wè analiz konplè a</div>
 </header>
-<div class="wrap">{combos_html}</div>
+<div class="wrap">{combos_html}{results_html}</div>
 <header style="padding-top:0">
 <input id="q" type="search" placeholder="Chèche yon ekip…" autocomplete="off">
 <div class="chips">{chips}</div></header>
@@ -186,6 +189,26 @@ fetch('https://{code}.goatcounter.com/counter/TOTAL.json').then(r => r.ok ? r.js
 }}).catch(() => {{}});
 </script>"""
     return f'<script data-goatcounter="https://{code}.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>' + counter
+
+
+def results_section(finished, tally):
+    if not finished:
+        return ""
+    ch, x2 = tally["chwa"], tally["1x2"]
+    head = ""
+    if ch[0]:
+        head += f'Chwa konklizyon yo: <b>{ch[1]}/{ch[0]}</b> pase ({round(100 * ch[1] / ch[0])}%)'
+    if x2[0]:
+        head += f' · Favori 1X2: <b>{x2[1]}/{x2[0]}</b> ({round(100 * x2[1] / x2[0])}%)'
+    items = ""
+    for f in finished[:40]:
+        a, r = f["analiz"], f["rezilta"]
+        marks = "".join(p["rezilta"] for p in f["prediksyon"] if p["tip"] != "1X2")
+        items += (f'<a class="rcard" href="m/{escape(a["slug"])}.html"><span class="muted small">{f["kickoff"]:%d/%m}</span>'
+                  f'<span class="rt">{e(a["lakay"])} <b>{r["hg"]}-{r["ag"]}</b> {e(a["deyò"])}</span><span>{marks}</span></a>')
+    return f"""<details class="results"><summary><b>📋 Rezilta resan</b> <span class="muted small">(14 dènye jou)</span>
+<div class="small">{head}</div></summary>{items}
+<p class="muted small">✅ = prediksyon an pase · ❌ = li pa pase · ⏳ = n ap tann done kònè yo. Prediksyon yo sove anvan chak match epi yo pa chanje apre.</p></details>"""
 
 
 def combos_section(combos, verified, start, end, bt, agent=None):
@@ -248,6 +271,8 @@ def main():
         a = analyze_quiet(home, away, europe)
         if not a:
             continue
+        ko = T.kickoff(when, time_label)
+        T.save_snapshot(a, ko, code)
         ctx_path = CONTEXT_DIR / f"{a['slug']}.json"
         ctx = json.loads(ctx_path.read_text(encoding="utf-8")) if ctx_path.exists() else {}
         html = build(a, ctx).replace("<main>", "<main>" + BACK_LINK, 1).replace("</body>", analytics_tag() + "</body>", 1)
@@ -260,6 +285,19 @@ def main():
         count += 1
         print(f"  ✓ {comp_name}: {a['lakay']} vs {a['deyò']}")
 
+    # Rezilta match ki fini yo: paj ak ✅/❌, ak seksyon sou paj akèy la
+    finished, tally = T.collect(days=14)
+    result_by_slug = {}
+    for f in finished:
+        a = {**f["analiz"], "rezilta_match": f["rezilta"], "prediksyon_rezilta": f["prediksyon"]}
+        result_by_slug[a["slug"]] = f
+        ctx_path = CONTEXT_DIR / f"{a['slug']}.json"
+        ctx = json.loads(ctx_path.read_text(encoding="utf-8")) if ctx_path.exists() else {}
+        html = build(a, ctx).replace("<main>", "<main>" + BACK_LINK, 1).replace("</body>", analytics_tag() + "</body>", 1)
+        (SITE_DIR / "m" / f"{a['slug']}.html").write_text(html, encoding="utf-8")
+    results_html = results_section(finished, tally)
+    print(f"✓ Rezilta: {len(finished)} match fini ak prediksyon")
+
     # Konbinezon wikenn yo (5 chanpyona yo sèlman)
     import combo as C
     import model as M
@@ -271,12 +309,21 @@ def main():
         combos, _ = C.make_combos([(a, w) for a, w in weekend_analyses if start <= w <= end])
         verified = False
     print(f"✓ Konbinezon: {len(combos)} ({'ajan an' if verified else 'otomatik'})")
+    # Make seleksyon konbinezon yo otomatikman lè match yo fini
+    from backtest import outcome
+    for c in combos:
+        for leg in c["seleksyon"]:
+            f = result_by_slug.get(leg["slug"])
+            if f and not leg.get("rezilta"):
+                r = f["rezilta"]
+                o = outcome(leg["mache"], r["hg"], r["ag"], r["hc"], r["ac"])
+                leg["rezilta"] = "" if o is None else ("✅" if o else "❌")
     combos_html = combos_section(combos, verified, start, end, M.load_backtest(), agent)
 
     order = list(EURO_COMPS) + list(LEAGUES)
     comps = {k: comps[k] for k in order if k in comps}
     updated = datetime.now().strftime("%d/%m/%Y %H:%M") + " UTC"
-    index = index_page(sorted(groups.items()), comps, updated, combos_html).replace("</body>", analytics_tag() + "</body>", 1)
+    index = index_page(sorted(groups.items()), comps, updated, combos_html, results_html).replace("</body>", analytics_tag() + "</body>", 1)
     (SITE_DIR / "index.html").write_text(index, encoding="utf-8")
     print("✓ Estatistik vizitè (GoatCounter) aktive" if analytics_tag() else "(GoatCounter pa konfigire)")
     (SITE_DIR / ".nojekyll").write_text("")

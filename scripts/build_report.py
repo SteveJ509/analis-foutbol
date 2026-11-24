@@ -89,6 +89,27 @@ def stars(n):
     return "★" * n + "☆" * (3 - n)
 
 
+def result_card(a):
+    res = a.get("rezilta_match")
+    if not res:
+        return ""
+    rows = "".join(
+        f'<li class="rr"><span>{e(r["rezilta"])}</span><div><b>{e(r["non"])}</b>'
+        f'<small>{e(r["tip"])} · modèl la te bay {r["pousantaj"]}%</small></div></li>'
+        for r in a.get("prediksyon_rezilta", []))
+    ok = sum(r["rezilta"] == "✅" for r in a.get("prediksyon_rezilta", []))
+    tot = sum(r["rezilta"] in ("✅", "❌") for r in a.get("prediksyon_rezilta", []))
+    corners = (f' · Kònè: {int(res["hc"])}-{int(res["ac"])}' if res.get("hc") is not None and res.get("ac") is not None else "")
+    return f"""<div class="card resc">
+  <h2>📋 Rezilta final</h2>
+  <div class="fs"><span>{e(a['lakay'])}</span><b>{res['hg']} - {res['ag']}</b><span>{e(a['deyò'])}</span></div>
+  <p class="muted small" style="text-align:center">{e(res.get('sous'))}{corners}</p>
+  <p><b>{ok}/{tot}</b> prediksyon pase</p>
+  <ul class="rl">{rows}</ul>
+  {'<p class="muted small">⏳ = n ap tann done kònè yo (yo vini kèk jou apre match la).</p>' if any(r["rezilta"] == "⏳" for r in a.get("prediksyon_rezilta", [])) else ''}
+</div>"""
+
+
 def conclusion_card(a):
     rec = a.get("rekòmandasyon") or {}
     picks, values = rec.get("chwa") or [], rec.get("value") or []
@@ -274,6 +295,8 @@ details summary{{cursor:pointer;color:var(--h);margin:6px 0}}
 tr.me td{{font-weight:700;background:var(--bg)}}
 .verdict{{border-left:4px solid var(--h)}}
 .foot{{font-size:.8rem;color:var(--muted);text-align:center;margin:20px 0}}
+.resc{{border-left:4px solid var(--h)}}.fs{{display:flex;justify-content:space-between;align-items:center;gap:8px;text-align:center}}.fs span{{flex:1;font-weight:600}}.fs b{{font-size:1.8rem}}
+.rl{{list-style:none;padding:0;margin:0}}.rr{{display:flex;gap:10px;align-items:center;padding:8px;border-radius:10px;background:var(--bg);margin:6px 0}}.rr>span{{font-size:1.3rem}}.rr small{{display:block;color:var(--muted)}}
 .concl{{border-left:4px solid var(--w)}}.pick{{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:10px;border-radius:10px;background:var(--bg);margin:8px 0}}
 .pick.top{{outline:2px solid var(--w)}}.pick.val{{outline:1px dashed var(--h)}}.pick .pr{{text-align:right;white-space:nowrap}}.pick .pr b{{display:block;font-size:1.15rem}}.pick .pr small{{color:var(--muted)}}
 .st{{color:#d4a72c;letter-spacing:1px;font-size:.85rem}}.small{{font-size:.8rem}}h3{{font-size:.95rem;margin:14px 0 4px}}
@@ -299,6 +322,8 @@ a{{color:var(--h)}}
   {market_rows}</table>
   <p class="muted">Gòl atann: {e(H)} {model['gòl_atann_lakay']} · {e(A)} {model['gòl_atann_deyò']}</p></details>
 </div>
+
+{result_card(a)}
 
 {conclusion_card(a)}
 
