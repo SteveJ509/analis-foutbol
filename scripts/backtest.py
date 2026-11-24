@@ -15,7 +15,8 @@ import model as M
 from config import LEAGUES
 from footdata import load_results
 
-WARMUP = 120  # kantite match anvan nou kòmanse teste
+WARMUP = 120
+LAST = {}  # kantite match anvan nou kòmanse teste
 
 
 def outcome(key, hg, ag, hc, ac):
@@ -140,6 +141,7 @@ def run():
             per_league[info["non"]] = {"n": lg_n, "reyisi": round(100 * lg_hit / lg_n, 1)}
         print(f"  ✓ {info['non']}: {lg_n} match teste")
 
+    LAST["weekend"] = weekend
     # Tès konbinezon wikenn yo: 5 chanpyona yo ansanm, menm règ ak sit la
     combo_res = {t["id"]: {"wikenn": 0, "genyen": 0, "kòt": [], "seleksyon": 0, "seleksyon_genyen": 0} for t in C.TARGETS}
     for wkey, items in sorted(weekend.items()):
