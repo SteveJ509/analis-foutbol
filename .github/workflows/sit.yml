@@ -36,6 +36,9 @@ jobs:
           APIFOOTBALL_KEY: ${{ secrets.APIFOOTBALL_KEY }}
         run: python3 scripts/fetch_data.py
 
+      - name: Teste modèl la sou match ki deja jwe (backtest)
+        run: python3 scripts/backtest.py
+
       - name: Analize match yo epi konstwi sit la
         env:
           FOOTBALL_DATA_TOKEN: ${{ secrets.FOOTBALL_DATA_TOKEN }}

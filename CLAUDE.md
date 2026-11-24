@@ -4,7 +4,9 @@ Pwojè pou analize match nan 5 gran chanpyona Ewòp yo, Champions League ak Euro
 
 - Done estatistik: football-data.co.uk (gratis, pa bezwen kle). Script: `scripts/fetch_data.py`
 - Koup Ewòp: `scripts/fetch_europe.py` (football-data.org pou CL, API-Football pou EL; kle yo nan `.env`)
-- Analiz: `scripts/analyze_match.py` (`--europe CL` oswa `--europe EL` pou koup yo) (fòm, atak, defans, kònè, klasman, modèl Poisson, kòt mache)
+- Modèl: `scripts/model.py` (Dixon-Coles ak time decay, gòl efikas = gòl + xG/chout kadre, kònè, tout mache, rekòmandasyon ak value bets)
+- Backtest: `scripts/backtest.py` → `data/backtest.json` (kalibrasyon, pwa modèl/mache, rezilta chwa yo)
+- Analiz: `scripts/analyze_match.py` (`--europe CL` oswa `--europe EL` pou koup yo)
 - Kontèks (blesi, estad, move tan, enpòtans): ajan `analis-foutbol` la chèche yo sou entènèt
 - Rapò HTML pou telefòn: `scripts/build_report.py` → `reports/`
 - Sit live: `scripts/build_site.py` → `site/`, pibliye pa `.github/workflows/sit.yml` (GitHub Actions, 2 fwa pa jou)

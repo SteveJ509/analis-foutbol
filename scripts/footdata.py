@@ -76,6 +76,12 @@ def _row_to_match(row, season=None):
         "odds_a": _float(row.get("AvgA") or row.get("B365A") or row.get("PSA")),
         "odds_o25": _float(row.get("Avg>2.5") or row.get("B365>2.5")),
         "odds_u25": _float(row.get("Avg<2.5") or row.get("B365<2.5")),
+        # Pi bon kòt sou mache a (pou chèche value)
+        "max_h": _float(row.get("MaxH") or row.get("BbMxH")),
+        "max_d": _float(row.get("MaxD") or row.get("BbMxD")),
+        "max_a": _float(row.get("MaxA") or row.get("BbMxA")),
+        "max_o25": _float(row.get("Max>2.5") or row.get("BbMx>2.5")),
+        "max_u25": _float(row.get("Max<2.5") or row.get("BbMx<2.5")),
     }
 
 

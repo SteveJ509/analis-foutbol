@@ -176,6 +176,15 @@ python3 scripts/build_site.py
 ```
 Apre sa, nan aplikasyon **Files**, ale nan **Linux files → analis-foutbol → site**, epi ouvri `index.html`.
 
+## Kijan modèl la mache
+
+- **Dixon-Coles:** se modèl estatistik parieur pwofesyonèl yo itilize. Li mezire atak, defans ak avantaj lakay chak ekip. Match resan yo gen plis pwa pase ansyen yo, epi li korije ti skò yo (0-0, 1-1).
+- **Gòl efikas:** modèl la melanje gòl reyèl yo ak chout kadre yo (oswa xG), pou l mwens twonpe pa chans ak malchans.
+- **Mache:** lè gen kòt bookmaker, modèl la melanje pwòp estimasyon pa l ak pa mache a. Tès la chwazi pwa chak bò.
+- **Konklizyon:** 1 a 3 chwa ki gen ant 58% ak 88% chans, ak etwal pou konfyans ak **kòt jis** la. Kòt jis la se kòt minimòm ki fè paryaj la vo lapenn.
+- **Value bets:** lè kòt bookmaker a pi wo pase kòt jis la ak omwen 4%.
+- **Backtest:** chak mizajou, modèl la teste tèt li sou match ki deja jwe. Li sèvi ak rezilta tès sa yo pou l retire mache ki pa t mache byen, epi pou l bese etwal yo lè l twò optimis.
+
 ## Bagay pou w konnen
 
 - Pou match chanpyona, estatistik yo se match chanpyona sèlman. Pou match Ewòp, fòm nan gen tout konpetisyon.

@@ -70,8 +70,9 @@ def card(a, when, time_label, comp_name, comp_code):
     c, m = a["konbine"], a["modèl"]
     H, A = a["lakay"], a["deyò"]
     ph, pd, pa = c["lakay_genyen"], c["nil"], c["deyò_genyen"]
-    best = max(ph, pd, pa)
-    pick = "Nil" if best == pd else (H if best == ph else A)
+    picks = (a.get("rekòmandasyon") or {}).get("chwa") or []
+    top = picks[0] if picks else None
+    vals = (a.get("rekòmandasyon") or {}).get("value") or []
     sh = a["ekip_lakay"]["rezime_10"].get("fòm", "")[:5]
     sa = a["ekip_deyò"]["rezime_10"].get("fòm", "")[:5]
     search = escape(f"{H} {A} {comp_name}".lower())
@@ -81,7 +82,9 @@ def card(a, when, time_label, comp_name, comp_code):
   <div class="teams"><div><b>{e(H)}</b><small>{e(sh)}</small></div><div><b>{e(A)}</b><small>{e(sa)}</small></div></div>
   <div class="pbar"><i class="h" style="width:{ph}%"></i><i class="d" style="width:{pd}%"></i><i class="a" style="width:{pa}%"></i></div>
   <div class="nums"><span>{ph}%</span><span>X {pd}%</span><span>{pa}%</span></div>
-  <div class="meta">Favori: <b>{e(pick)}</b> · +2.5: {m['plis_2_5']}% · Tou de make: {m['tou_de_make']}%</div>
+  <div class="meta">{('✅ <b>' + e(top['non']) + '</b> ' + str(top['pousantaj']) + '% <span class="st">' + '★' * top['etwal'] + '</span>') if top else ''}
+  {('<br>💎 Value: ' + e(vals[0]['non']) + ' @ ' + str(vals[0]['kòt'])) if vals else ''}</div>
+  <div class="meta">+1.5: {m['plis_1_5']}% · +2.5: {m['plis_2_5']}% · Tou de make: {m['tou_de_make']}%</div>
 </a>"""
 
 
@@ -94,6 +97,11 @@ def day_label(d):
 
 
 def index_page(groups, comps, updated):
+    import model as M
+    bt = M.load_backtest()
+    ch = (bt.get("chwa") or {}).get("tout") or {}
+    bt_line = (f' · Tès modèl la: premye chwa a pase <b>{ch["reyisi"]}%</b> sou {ch["n"]} match ki deja jwe'
+               if ch.get("reyisi") else "")
     chips = '<button class="chip on" data-f="all">Tout</button>' + "".join(
         f'<button class="chip" data-f="{escape(k)}">{e(v)}</button>' for k, v in comps.items()
     )
@@ -130,11 +138,11 @@ input{{width:100%;padding:11px 14px;border-radius:12px;border:1px solid var(--li
 .teams b{{display:block}}.teams small{{color:var(--muted);letter-spacing:2px;font-size:.75rem}}
 .pbar{{display:flex;height:8px;border-radius:4px;overflow:hidden}}.pbar i{{display:block}}.pbar .h{{background:var(--h)}}.pbar .d{{background:var(--d)}}.pbar .a{{background:var(--a)}}
 .nums{{display:flex;justify-content:space-between;font-weight:700;font-size:.9rem;margin-top:4px}}
-.meta{{font-size:.8rem;color:var(--muted);margin-top:6px}}
+.meta{{font-size:.8rem;color:var(--muted);margin-top:6px}}.meta b{{color:var(--ink)}}.st{{color:#d4a72c}}
 .empty{{text-align:center;color:var(--muted);margin:40px 0}}
 footer{{text-align:center;font-size:.78rem;color:var(--muted);padding:20px 14px 40px;max-width:640px;margin:auto}}
 </style></head><body>
-<header><h1>⚽ Analiz Foutbòl</h1><div class="muted">Mete ajou: {e(updated)} · Klike sou yon match pou w wè analiz konplè a</div>
+<header><h1>⚽ Analiz Foutbòl</h1><div class="muted">Mete ajou: {e(updated)}{bt_line} · Klike sou yon match pou w wè analiz konplè a</div>
 <input id="q" type="search" placeholder="Chèche yon ekip…" autocomplete="off">
 <div class="chips">{chips}</div></header>
 <main id="list">{body}</main>

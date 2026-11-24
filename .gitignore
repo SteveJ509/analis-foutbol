@@ -5,3 +5,4 @@ venv/
 .env
 site/
 data/analysis/
+data/backtest.json

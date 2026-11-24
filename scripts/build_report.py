@@ -69,6 +69,58 @@ def absences(items):
     return '<ul class="abs">' + "".join(out) + "</ul>"
 
 
+def stars(n):
+    return "★" * n + "☆" * (3 - n)
+
+
+def conclusion_card(a):
+    rec = a.get("rekòmandasyon") or {}
+    picks, values = rec.get("chwa") or [], rec.get("value") or []
+    if not picks and not values:
+        return ""
+    rows = ""
+    for i, p in enumerate(picks):
+        t = p.get("tès")
+        test = (f'<div class="muted small">Nan tès la: lè modèl la te bay {t["bann"]}, sa te pase '
+                f'<b>{t["reyisi"]}%</b> nan {t["n"]} match</div>') if t else ""
+        rows += (f'<div class="pick{" top" if i == 0 else ""}"><div class="pl"><b>{e(p["non"])}</b>{test}</div>'
+                 f'<div class="pr"><span class="st">{stars(p["etwal"])}</span><b>{p["pousantaj"]}%</b>'
+                 f'<small>kòt jis {p["kòt_jis"]}</small></div></div>')
+    vrows = "".join(
+        f'<div class="pick val"><div class="pl"><b>{e(v["non"])}</b><div class="muted small">Modèl: {v["pousantaj"]}% → kòt jis {v["kòt_jis"]}</div></div>'
+        f'<div class="pr"><b>@ {v["kòt"]}</b><small>+{v["avantaj"]}% avantaj</small></div></div>' for v in values)
+    tès = rec.get("tès") or {}
+    ch = tès.get("chwa") or {}
+    test_line = (f'<p class="muted small">Tès sou {tès.get("n")} match ki deja jwe: premye chwa modèl la te pase '
+                 f'<b>{ch.get("reyisi")}%</b> nan tan an.</p>') if ch.get("reyisi") else ""
+    return f"""
+<div class="card concl">
+  <h2>✅ Konklizyon</h2>
+  <p class="muted small">Chwa ki gen plis chans yo (ant 58% ak 88%). <b>Kòt jis</b> la se kòt minimòm ki fè paryaj la vo lapenn. Si bookmaker ou a bay mwens, pa pran l.</p>
+  {rows}
+  {('<h3>💎 Value bets</h3><p class="muted small">Kòt bookmaker yo pi wo pase sa modèl la estime. Se sa pwofesyonèl yo chèche.</p>' + vrows) if vrows else ''}
+  {test_line}
+</div>"""
+
+
+def markets_card(a):
+    rows = a.get("tout_mache") or []
+    if not rows:
+        return ""
+    groups = {"rezilta": "Rezilta", "over": "Gòl (over)", "under": "Gòl (under)", "btts": "Tou de make",
+              "gòl_ekip": "Gòl chak ekip", "kònè": "Kònè"}
+    body = ""
+    for fam, title in groups.items():
+        items = [r for r in rows if r["fanmi"] == fam]
+        if not items:
+            continue
+        body += f'<tr><th colspan="3" class="grp">{e(title)}</th></tr>' + "".join(
+            f'<tr><td>{e(r["non"])}</td><td><b>{r["pousantaj"]}%</b></td><td class="muted">{e(r["kòt_jis"])}</td></tr>'
+            for r in items)
+    return f"""<div class="card"><details><summary><b>📊 Tout mache yo</b> (pousantaj ak kòt jis)</summary>
+<table class="list mk"><tr><th>Mache</th><th>Chans</th><th>Kòt jis</th></tr>{body}</table></details></div>"""
+
+
 def auto_analysis(a):
     """Yon ti analiz otomatik an Kreyòl, lè ajan an poko ekri pa l la."""
     H, A = a["lakay"], a["deyò"]
@@ -107,6 +159,10 @@ def auto_analysis(a):
         if ref:
             cmp = " (plis pase mwayèn chanpyona a)" if kc["total"] > ref + 0.7 else (" (mwens pase mwayèn chanpyona a)" if kc["total"] < ref - 0.7 else " (tou pre mwayèn chanpyona a)")
         parts.append(f"Kònè atann: anviwon {kc['total']}{cmp}.")
+    picks = (a.get("rekòmandasyon") or {}).get("chwa") or []
+    if picks:
+        p = picks[0]
+        parts.append(f"Konklizyon: chwa ki pi solid la se «{p['non']}» ({p['pousantaj']}%, kòt jis {p['kòt_jis']}).")
     parts.append("Analiz otomatik sa a baze sou chif yo sèlman: li pa konnen blesi ak nouvèl dènye minit yo.")
     return " ".join(parts)
 
@@ -202,6 +258,10 @@ details summary{{cursor:pointer;color:var(--h);margin:6px 0}}
 tr.me td{{font-weight:700;background:var(--bg)}}
 .verdict{{border-left:4px solid var(--h)}}
 .foot{{font-size:.8rem;color:var(--muted);text-align:center;margin:20px 0}}
+.concl{{border-left:4px solid var(--w)}}.pick{{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:10px;border-radius:10px;background:var(--bg);margin:8px 0}}
+.pick.top{{outline:2px solid var(--w)}}.pick.val{{outline:1px dashed var(--h)}}.pick .pr{{text-align:right;white-space:nowrap}}.pick .pr b{{display:block;font-size:1.15rem}}.pick .pr small{{color:var(--muted)}}
+.st{{color:#d4a72c;letter-spacing:1px;font-size:.85rem}}.small{{font-size:.8rem}}h3{{font-size:.95rem;margin:14px 0 4px}}
+.mk td:nth-child(2),.mk td:nth-child(3){{text-align:right;white-space:nowrap}}.grp{{text-align:left;font-weight:700;padding-top:12px}}
 a{{color:var(--h)}}
 </style></head><body><main>
 
@@ -219,10 +279,12 @@ a{{color:var(--h)}}
   <small>{e(c.get('metòd'))}</small>
   <details><summary>Wè detay modèl la</summary>
   <table><tr><th></th><th>{e(H)}</th><th>Nil</th><th>{e(A)}</th></tr>
-  <tr><th>Modèl Poisson</th><td>{model['lakay_genyen']}%</td><td>{model['nil']}%</td><td>{model['deyò_genyen']}%</td></tr>
+  <tr><th>Modèl Dixon-Coles</th><td>{model['lakay_genyen']}%</td><td>{model['nil']}%</td><td>{model['deyò_genyen']}%</td></tr>
   {market_rows}</table>
   <p class="muted">Gòl atann: {e(H)} {model['gòl_atann_lakay']} · {e(A)} {model['gòl_atann_deyò']}</p></details>
 </div>
+
+{conclusion_card(a)}
 
 <div class="card verdict">
   <h2>🧠 Analiz</h2>
@@ -281,6 +343,8 @@ a{{color:var(--h)}}
   </table>
   <p class="muted">Plis 1.5: {model['plis_1_5']}% · Plis 3.5: {model['plis_3_5']}%{(' · ' + e(kc.get('nòt'))) if kc.get('nòt') else ''}</p>
 </div>
+
+{markets_card(a)}
 
 <div class="card">
   <h2>🔢 Skò ki pi posib</h2>

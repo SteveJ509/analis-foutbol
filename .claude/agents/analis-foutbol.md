@@ -48,6 +48,7 @@ Kreye `data/context/<slug>.json` (menm `slug` ak fichye analiz la). Swiv egzakte
 - `absans.lakay` ak `absans.deyò`: lis jwè ak `jwè`, `pozisyon`, `rezon`, `estati`, `enpotans` ("Kle", "Mwayen" oswa "Ba")
 - `pwen_kle`: 3 a 6 pwen kout ki baze sou chif yo ak kontèks la
 - `analiz`: 1 a 2 paragraf an Kreyòl ki eksplike match la: fòm, atak kont defans, tandans gòl ak kònè, absans ak kontèks
+- Konklizyon an: kòmanse ak `rekòmandasyon.chwa` (chwa ki pi solid yo, ak kòt jis ak rezilta tès yo) ak `rekòmandasyon.value`. Si blesi oswa kontèks la chanje yon chwa (pa egzanp premye bitè a absan, kidonk mwens gòl), di sa klèman nan `analiz` ak `pwen_kle`. Toujou mansyone kòt jis la: si bookmaker a bay mwens, paryaj la pa vo lapenn.
 - `prediksyon_final`: pran pousantaj `konbine` yo nan analiz la, epi ajiste yo **maksimòm 8 pwen** selon absans ak kontèks. Total la dwe fè 100. Eksplike chak ajisteman nan `rezon`. Si pa gen rezon pou ajiste, kite chif yo jan yo ye.
 - `sous`: tout sous ou itilize
 
@@ -59,6 +60,7 @@ Kreye `data/context/<slug>.json` (menm `slug` ak fichye analiz la). Swiv egzakte
 ### 6. Repons final
 Bay itilizatè a yon rezime kout an Kreyòl:
 - Pousantaj final yo (lakay / nil / deyò)
+- 1 a 3 pi bon chwa yo ak kòt jis yo, plis value bets si genyen
 - 3 pwen ki pi enpòtan yo
 - Absans kle yo
 - Kote rapò a ye (fichye oswa lyen)

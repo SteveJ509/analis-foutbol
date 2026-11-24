@@ -15,6 +15,7 @@ import sys
 from datetime import datetime
 
 from config import ALL_DOMESTIC, ANALYSIS_DIR, DEFAULT_STRENGTH, EURO_COMPS, LEAGUE_STRENGTH, LEAGUES, load_env
+import model as M
 from footdata import all_teams, load_euro, load_fixtures, load_results, resolve_team
 
 N_FORM = 10
@@ -309,43 +310,17 @@ def analyze(home_in, away_in):
         for m in reversed(h2h)
     ]
 
-    # Modèl
-    att_h, def_h, n_h = strength(matches, home, lg)
-    att_a, def_a, n_a = strength(matches, away, lg)
-    lam_h = att_h * def_a * lg["gòl_lakay"]
-    lam_a = att_a * def_h * lg["gòl_deyò"]
-    model = poisson_model(lam_h, lam_a)
-    model["fòs"] = {"atak_lakay": att_h, "defans_lakay": def_h, "atak_deyò": att_a, "defans_deyò": def_a,
-                    "match_itilize": [n_h, n_a]}
-    out["modèl"] = model
-
-    # Kònè atann
-    sh, sa = out["ekip_lakay"]["rezime_10"], out["ekip_deyò"]["rezime_10"]
-    if sh.get("mwayèn_kònè_fè") is not None and sa.get("mwayèn_kònè_pran") is not None:
-        ch = (sh["mwayèn_kònè_fè"] + sa["mwayèn_kònè_pran"]) / 2
-        ca = (sa["mwayèn_kònè_fè"] + sh["mwayèn_kònè_pran"]) / 2
-        out["kònè_atann"] = {"lakay": round(ch, 1), "deyò": round(ca, 1), "total": round(ch + ca, 1),
-                             "mwayèn_chanpyona": lg["kònè_pa_match"]}
-
-    # Mache (kòt bookmaker yo)
-    if fixture:
-        imp = implied([fixture["odds_h"], fixture["odds_d"], fixture["odds_a"]])
-        ou = implied([fixture["odds_o25"], fixture["odds_u25"]])
-        if imp:
-            out["mache"] = {
-                "kòt": {"lakay": fixture["odds_h"], "nil": fixture["odds_d"], "deyò": fixture["odds_a"]},
-                "lakay_genyen": imp[0], "nil": imp[1], "deyò_genyen": imp[2],
-                "plis_2_5": ou[0] if ou else None,
-            }
-            out["konbine"] = {
-                "metòd": "50% modèl Poisson + 50% mache",
-                "lakay_genyen": round((model["lakay_genyen"] + imp[0]) / 2, 1),
-                "nil": round((model["nil"] + imp[1]) / 2, 1),
-                "deyò_genyen": round((model["deyò_genyen"] + imp[2]) / 2, 1),
-            }
-    if "konbine" not in out:
-        out["konbine"] = {"metòd": "Modèl Poisson sèlman (pa gen kòt)",
-                          "lakay_genyen": model["lakay_genyen"], "nil": model["nil"], "deyò_genyen": model["deyò_genyen"]}
+    # Modèl Dixon-Coles (sèlman ak match ki jwe anvan jodi a)
+    ref = datetime.now()
+    fit = M.fit_league(matches, ref)
+    gfit, cfit = fit["goals"], fit["corners"]
+    lam, mu = M.expected(gfit, home, away)
+    corners = M.expected(cfit, home, away) if cfit and home in cfit["att"] and away in cfit["att"] else None
+    n_min = min(gfit["n"].get(home, 0), gfit["n"].get(away, 0))
+    fòs = {"atak_lakay": round(gfit["att"][home], 3), "defans_lakay": round(gfit["def"][home], 3),
+           "atak_deyò": round(gfit["att"][away], 3), "defans_deyò": round(gfit["def"][away], 3),
+           "avantaj_lakay": round(gfit["home"], 3), "rho": gfit["rho"], "match_itilize": [gfit["n"].get(home), gfit["n"].get(away)]}
+    out.update(model_output(lam, mu, gfit["rho"], corners, home, away, n_min, fixture, fòs, lg.get("kònè_pa_match")))
 
     ANALYSIS_DIR.mkdir(parents=True, exist_ok=True)
     slug = f"{slugify(home)}-vs-{slugify(away)}"
@@ -355,16 +330,95 @@ def analyze(home_in, away_in):
     return out, path
 
 
+# ---------- Modèl + mache + rekòmandasyon ----------
+
+def _fit_to_targets(lam, mu, rho, targets):
+    """Ajiste gòl atann yo pou yo dakò ak pwobabilite melanje yo (modèl + mache)."""
+    best, best_err = (lam, mu), 1e9
+    for i in range(-20, 21):
+        for j in range(-20, 21):
+            l2, m2 = lam * (1 + i / 50), mu * (1 + j / 50)
+            mk, _ = M.markets(l2, m2, rho)
+            err = sum((mk[k] - v) ** 2 for k, v in targets.items())
+            if err < best_err:
+                best, best_err = (l2, m2), err
+    return best
+
+
+def model_output(lam, mu, rho, corners, H, A, n_min, fixture, fòs, league_corners=None, note=None):
+    bt = M.load_backtest()
+    w = bt.get("pwa_modèl", 0.4)
+    raw, _ = M.markets(lam, mu, rho, corners)
+    res = {}
+    market_odds, disagree, targets = {}, 0.0, None
+    if fixture:
+        imp = implied([fixture.get("odds_h"), fixture.get("odds_d"), fixture.get("odds_a")])
+        ou = implied([fixture.get("odds_o25"), fixture.get("odds_u25")])
+        if imp:
+            imp = [x / 100 for x in imp]
+            res["mache"] = {"kòt": {"lakay": fixture["odds_h"], "nil": fixture["odds_d"], "deyò": fixture["odds_a"]},
+                            "lakay_genyen": round(100 * imp[0], 1), "nil": round(100 * imp[1], 1),
+                            "deyò_genyen": round(100 * imp[2], 1),
+                            "plis_2_5": ou[0] if ou else None}
+            disagree = max(abs(raw["1"] - imp[0]), abs(raw["2"] - imp[2]))
+            targets = {"1": w * raw["1"] + (1 - w) * imp[0], "X": w * raw["X"] + (1 - w) * imp[1],
+                       "2": w * raw["2"] + (1 - w) * imp[2]}
+            if ou:
+                targets["O2.5"] = w * raw["O2.5"] + (1 - w) * ou[0] / 100
+            for k, f in (("1", "max_h"), ("X", "max_d"), ("2", "max_a"), ("O2.5", "max_o25"), ("U2.5", "max_u25")):
+                if fixture.get(f):
+                    market_odds[k] = fixture[f]
+    if targets:
+        lam2, mu2 = _fit_to_targets(lam, mu, rho, targets)
+        metòd = f"Dixon-Coles + mache ({int(w * 100)}% modèl / {int(100 - w * 100)}% mache)"
+    else:
+        lam2, mu2 = lam, mu
+        metòd = "Modèl Dixon-Coles (pa gen kòt mache)"
+    mk, scores = M.markets(lam2, mu2, rho, corners)
+    r1 = lambda x: round(100 * x, 1)  # noqa: E731
+    res["modèl"] = {
+        "non": "Dixon-Coles",
+        "gòl_atann_lakay": round(lam2, 2), "gòl_atann_deyò": round(mu2, 2),
+        "gòl_atann_modèl_pi": [round(lam, 2), round(mu, 2)],
+        "lakay_genyen": r1(raw["1"]), "nil": r1(raw["X"]), "deyò_genyen": r1(raw["2"]),
+        "plis_1_5": r1(mk["O1.5"]), "plis_2_5": r1(mk["O2.5"]), "plis_3_5": r1(mk["O3.5"]),
+        "tou_de_make": r1(mk["BTTS"]),
+        "skò_pi_posib": [{"skò": sc, "pousantaj": r1(p)} for sc, p in scores],
+        "fòs": fòs,
+    }
+    res["konbine"] = {"metòd": metòd, "lakay_genyen": r1(mk["1"]), "nil": r1(mk["X"]), "deyò_genyen": r1(mk["2"])}
+    if note:
+        res["konbine"]["metòd"] += " · " + note
+    picks, values = M.recommend(mk, H, A, n_min, market_odds, bt, disagree)
+    res["rekòmandasyon"] = {"chwa": picks, "value": values,
+                            "tès": {"n": bt.get("match_teste"), "chwa": (bt.get("chwa") or {}).get("tout")} if bt else None}
+    res["tout_mache"] = M.all_markets_table(mk, H, A)
+    if corners:
+        res["kònè_atann"] = {"lakay": round(corners[0], 1), "deyò": round(corners[1], 1),
+                             "total": round(corners[0] + corners[1], 1), "mwayèn_chanpyona": league_corners}
+    return res
+
+
 # ---------- Koup Ewòp (Champions League / Europa League) ----------
 
-def _euro_strength(team, dom_code, dom_matches, euro_done, euro_lg):
-    """Fòs atak/defans: chanpyona lokal la si nou genyen l, sinon match Ewòp yo."""
+def _euro_strength(team, dom_code, dom_matches, euro_done, euro_lg, cache={}):
+    """Fòs atak/defans (Dixon-Coles): chanpyona lokal la si nou genyen l, sinon match Ewòp yo."""
+    now = datetime.now()
     if dom_code and dom_matches:
-        lg = league_averages(dom_matches)
-        att, dfn, n = strength(dom_matches, team, lg)
-        return att, dfn, n, "chanpyona lokal"
-    att, dfn, n = strength(euro_done, team, euro_lg)
-    return att, dfn, n, "match Ewòp"
+        if dom_code not in cache:
+            cache[dom_code] = M.fit_league(dom_matches, now)
+        fit = cache[dom_code]
+        if fit and team in fit["goals"]["att"]:
+            g, c = fit["goals"], fit["corners"]
+            corner = (c["base"] * c["att"][team], c["base"] * c["def"][team]) if c and team in c["att"] else None
+            return g["att"][team], g["def"][team], g["n"].get(team, 0), "chanpyona lokal", corner
+    key = "euro"
+    if key not in cache:
+        cache[key] = M.fit_strengths(euro_done, now, lambda m: (m["hg"], m["ag"]))
+    fit = cache[key]
+    if fit and team in fit["att"]:
+        return fit["att"][team], fit["def"][team], fit["n"].get(team, 0), "match Ewòp", None
+    return 1.0, 1.0, 0, "pa gen done", None
 
 
 def analyze_europe(home_in, away_in, comp_code):
@@ -442,20 +496,21 @@ def analyze_europe(home_in, away_in, comp_code):
             "nivo_defans": rating(s10.get("mwayèn_gòl_pran"), ref, higher_is_better=False),
         }
         if dom_code:
-            att, dfn, nm, basis = _euro_strength(dom_name, dom_code, dom_matches, [], euro_lg)
+            att, dfn, nm, basis, corner = _euro_strength(dom_name, dom_code, dom_matches, [], euro_lg)
         else:
-            att, dfn, nm, basis = _euro_strength(team, None, [], euro_done, euro_lg)
-        strengths[side] = (att, dfn, nm, basis, LEAGUE_STRENGTH.get(dom_code, DEFAULT_STRENGTH))
+            att, dfn, nm, basis, corner = _euro_strength(team, None, [], euro_done, euro_lg)
+        strengths[side] = (att, dfn, nm, basis, LEAGUE_STRENGTH.get(dom_code, DEFAULT_STRENGTH), corner)
 
-    att_h, def_h, n_h, b_h, f_h = strengths["ekip_lakay"]
-    att_a, def_a, n_a, b_a, f_a = strengths["ekip_deyò"]
+    att_h, def_h, n_h, b_h, f_h, c_h = strengths["ekip_lakay"]
+    att_a, def_a, n_a, b_a, f_a, c_a = strengths["ekip_deyò"]
     clamp = lambda x: max(0.2, min(4.0, x))  # noqa: E731
     lam_h = clamp(euro_lg["gòl_lakay"] * att_h * def_a * (f_h / f_a))
     lam_a = clamp(euro_lg["gòl_deyò"] * att_a * def_h * (f_a / f_h))
-    model = poisson_model(lam_h, lam_a)
-    model["fòs"] = {"atak_lakay": att_h, "defans_lakay": def_h, "atak_deyò": att_a, "defans_deyò": def_a,
-                    "match_itilize": [n_h, n_a], "baz": [b_h, b_a], "fòs_chanpyona": [f_h, f_a]}
-    out["modèl"] = model
+    corners = None
+    if c_h and c_a:  # kònè fè ekip la x kònè advèsè a konn bay
+        corners = (math.sqrt(c_h[0] * c_a[1]) * 1.05, math.sqrt(c_a[0] * c_h[1]) * 0.95)
+    fòs = {"atak_lakay": round(att_h, 3), "defans_lakay": round(def_h, 3), "atak_deyò": round(att_a, 3),
+           "defans_deyò": round(def_a, 3), "match_itilize": [n_h, n_a], "baz": [b_h, b_a], "fòs_chanpyona": [f_h, f_a]}
 
     # Fas a fas (Ewòp + chanpyona si yo nan menm chanpyona)
     hn, an = out["ekip_lakay"]["non_lokal"], out["ekip_deyò"]["non_lokal"]
@@ -466,15 +521,10 @@ def analyze_europe(home_in, away_in, comp_code):
     out["fas_a_fas"] = [{"dat": m["date"].strftime("%d/%m/%Y"), "lakay": m["home"], "deyò": m["away"],
                          "skò": f"{int(m['hg'])}-{int(m['ag'])}"} for m in reversed(h2h[-6:])]
 
-    sh, sa = out["ekip_lakay"]["rezime_10"], out["ekip_deyò"]["rezime_10"]
-    if sh.get("mwayèn_kònè_fè") is not None and sa.get("mwayèn_kònè_pran") is not None:
-        ch = (sh["mwayèn_kònè_fè"] + sa["mwayèn_kònè_pran"]) / 2
-        ca = (sa["mwayèn_kònè_fè"] + sh["mwayèn_kònè_pran"]) / 2
-        out["kònè_atann"] = {"lakay": round(ch, 1), "deyò": round(ca, 1), "total": round(ch + ca, 1),
-                             "mwayèn_chanpyona": None, "nòt": "Baze sou match chanpyona lokal yo sèlman"}
-
-    out["konbine"] = {"metòd": "Modèl Poisson (ajiste pou nivo chanpyona chak ekip). Pa gen kòt mache nan done gratis yo.",
-                      "lakay_genyen": model["lakay_genyen"], "nil": model["nil"], "deyò_genyen": model["deyò_genyen"]}
+    out.update(model_output(lam_h, lam_a, -0.05, corners, eh, ea, min(n_h, n_a), None, fòs,
+                            note="ajiste pou nivo chanpyona chak ekip; mwens presi pase match chanpyona"))
+    if "kònè_atann" in out:
+        out["kònè_atann"]["nòt"] = "Estimasyon ki baze sou match chanpyona lokal yo"
 
     # Blesi otomatik (API-Football sèlman)
     key = load_env().get("APIFOOTBALL_KEY")
