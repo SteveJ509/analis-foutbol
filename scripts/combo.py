@@ -21,7 +21,7 @@ MIN_P = 0.85
 MAX_P = 0.95
 TARGETS = [
     {"id": "k5", "non": "Konbinezon pridan", "sib": 5.0, "max": 12},
-    {"id": "k10", "non": "Konbinezon kòt 10", "sib": 10.0, "max": 16},
+    {"id": "k10", "non": "Konbinezon kòt 10", "sib": 10.0, "max": 20},
 ]
 # Mache ki kalifye pou konbinezon yo (BTTS ak rezilta sèk yo twò volatil)
 ALLOWED = {"O0.5", "O1.5", "U3.5", "U4.5", "1X", "X2", "12", "DNB1", "DNB2",
