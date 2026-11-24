@@ -294,6 +294,9 @@ def recommend(mk, H, A, n_min, market_odds=None, bt=None, disagree=0.0):
             break
 
     values = []
+    roi = (bt.get("value") or {}).get("roi")
+    if roi is not None and roi <= 0:
+        market_odds = {}  # nan tès la, value bets yo te pèdi lajan: nou pa montre yo
     for k, odds in (market_odds or {}).items():
         if not odds or k not in mk:
             continue
