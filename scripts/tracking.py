@@ -30,8 +30,16 @@ def save_snapshot(a, ko, code):
     """Sove prediksyon an. Apre match la kòmanse, nou pa janm chanje l ankò."""
     PRED_DIR.mkdir(parents=True, exist_ok=True)
     path = PRED_DIR / f"{ko:%Y%m%d}-{a['slug']}.json"
-    if path.exists() and _now() >= ko:
-        return path  # bloke
+    if path.exists():
+        if _now() >= ko:
+            return path  # bloke: match la kòmanse
+        try:  # pa reekri fichye a si prediksyon yo pa chanje (pou depo a pa grosi pou anyen)
+            old = json.loads(path.read_text(encoding="utf-8"))["analiz"]
+            keys = ("rekòmandasyon", "konbine", "tout_mache")
+            if all(old.get(k) == a.get(k) for k in keys):
+                return path
+        except (ValueError, KeyError):
+            pass
     data = {"kickoff": ko.strftime("%Y-%m-%dT%H:%M"), "kòd": code, "analiz": a}
     path.write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8")
     return path
