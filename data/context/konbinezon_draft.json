@@ -1,0 +1,37 @@
+{
+ "k5": [
+  {"slug": "nice-vs-troyes", "mache": "H_O0.5", "nòt": "Amoura, Clauss ak Diop disponib; Wahi ensèten men gen chans jwe. Nice ap goumen pou Ewòp. Pa jwenn alèt move tan."},
+  {"slug": "sociedad-vs-sevilla", "mache": "U4.5", "nòt": "5yèm kont 6yèm. La Real te jwe an Ewòp nan semèn nan, kidonk ka gen woulman. Barrenetxea ak Herrera absan, Sevilla manke Carmona."},
+  {"slug": "malaga-vs-ath-bilbao", "mache": "U4.5", "nòt": "Malaga dènye, li make sèlman 9 gòl. Athletic manke Guruzeta ak Sannadi."},
+  {"slug": "como-vs-juventus", "mache": "U4.5", "nòt": "Juve manke Yildiz, Thuram ak Locatelli; Como manke Kean ak Diao. De atak yo afebli."},
+  {"slug": "leeds-vs-coventry", "mache": "1X", "nòt": "Farke di tout jwè disponib. Coventry an fòm (4 viktwa nan 7 match), men Leeds lakay."},
+  {"slug": "cagliari-vs-milan", "mache": "U4.5", "nòt": "Milan manke Modric, Loftus-Cheek ak Saelemaekers apre match Ewòp li. Cagliari manke Mina ak Felici."},
+  {"slug": "inter-vs-genoa", "mache": "DNB1", "nòt": "Inter bat Stuttgart 2-0 an CL, Lautaro tounen. Calhanoglu absan, men ekip la prèske konplè."},
+  {"slug": "torino-vs-lazio", "mache": "U4.5", "nòt": "Lazio premye, li gen pi bon defans lan (9 gòl kont). Pa gen gwo absans."},
+  {"slug": "betis-vs-vallecano", "mache": "H_O0.5", "nòt": "Lo Celso ak Ceballos absan, men Cucho ap jwe. Rayo gen 1 viktwa nan 6 dènye match li yo."},
+  {"slug": "sunderland-vs-tottenham", "mache": "U4.5", "nòt": "Sunderland manke Brobbey ak Xhaka; Spurs manke Simons, Odobert ak Tel."},
+  {"slug": "lyon-vs-monaco", "mache": "U4.5", "nòt": "Tou de ekip yo te jwe an Ewòp jedi. Monaco pa genyen nan 6 match, Coulibaly suspann."}
+ ],
+ "k10": [
+  {"slug": "nice-vs-troyes", "mache": "H_O0.5", "nòt": "Amoura ak Diop disponib."},
+  {"slug": "sociedad-vs-sevilla", "mache": "U4.5", "nòt": "Batay pou Ewòp; ka gen woulman nan La Real."},
+  {"slug": "malaga-vs-ath-bilbao", "mache": "U4.5", "nòt": "Malaga pa make anpil; Athletic manke Guruzeta."},
+  {"slug": "como-vs-juventus", "mache": "U4.5", "nòt": "Plizyè atakan absan nan 2 ekip yo."},
+  {"slug": "leeds-vs-coventry", "mache": "1X", "nòt": "Leeds gen tout jwè li yo."},
+  {"slug": "cagliari-vs-milan", "mache": "U4.5", "nòt": "Milan gen anpil blese."},
+  {"slug": "inter-vs-genoa", "mache": "DNB1", "nòt": "Inter prèske konplè, Lautaro tounen."},
+  {"slug": "torino-vs-lazio", "mache": "U4.5", "nòt": "Lazio gen pi bon defans Serie A."},
+  {"slug": "betis-vs-vallecano", "mache": "H_O0.5", "nòt": "Cucho titilè; Rayo an difikilte."},
+  {"slug": "sunderland-vs-tottenham", "mache": "U4.5", "nòt": "De atak yo afebli."},
+  {"slug": "lyon-vs-monaco", "mache": "U4.5", "nòt": "Tou de ekip yo fatige apre jedi."},
+  {"slug": "brighton-vs-newcastle", "mache": "H_O0.5", "nòt": "Seleksyon ki pi fèb la: Brighton manke Ferguson, Mitoma ak Tzimas, men li make 4 gòl jedi an Ewòp (Osman, Kostoulas)."},
+  {"slug": "mainz-vs-union-berlin", "mache": "H_O0.5", "nòt": "Becker ak Tietz disponib; Union manke 7 jwè."},
+  {"slug": "espanol-vs-getafe", "mache": "U4.5", "nòt": "Getafe make sèlman 8 gòl nan 13 match; Espanyol gen 3 match san pran gòl."},
+  {"slug": "valencia-vs-osasuna", "mache": "U4.5", "nòt": "Valencia make sèlman 9 gòl; Budimir disponib."},
+  {"slug": "le-mans-vs-lille", "mache": "U4.5", "nòt": "Lille gen pi bon defans Ligue 1 (8 gòl kont)."},
+  {"slug": "stuttgart-vs-ein-frankfurt", "mache": "H_O0.5", "nòt": "Undav ak Demirović titilè; ka gen yon ti woulman apre CL."}
+ ],
+ "retire": [],
+ "chanjman": "",
+ "rezime": "Nou verifye 17 seleksyon yo ak dènye nouvèl yo (blesi, woulman apre Ewòp, enpòtans match yo): pa gen youn ki kontredi klèman, kidonk nou pa retire anyen. Seleksyon ki pi fèb la se Brighton make (anpil atakan blese). Nou pa jwenn okenn alèt move tan pou wikenn nan."
+}
