@@ -2,7 +2,7 @@
  "kòmanse": "27/11/2026",
  "fen": "30/11/2026",
  "verifye": true,
- "kreye_le": "27/11/2026 14:41 UTC",
+ "kreye_le": "28/11/2026 17:51 UTC",
  "konbinezon": [
   {
    "id": "k5",
@@ -61,7 +61,7 @@
       "n": 611
      },
      "nòt": "Malaga dènye, li make sèlman 9 gòl. Athletic manke Guruzeta ak Sannadi.",
-     "rezilta": ""
+     "rezilta": "❌"
     },
     {
      "match": "Como vs Juventus",
@@ -97,7 +97,7 @@
       "n": 105
      },
      "nòt": "Farke di tout jwè disponib. Coventry an fòm (4 viktwa nan 7 match), men Leeds lakay.",
-     "rezilta": ""
+     "rezilta": "✅"
     },
     {
      "match": "Cagliari vs Milan",
@@ -169,7 +169,7 @@
       "n": 273
      },
      "nòt": "Lo Celso ak Ceballos absan, men Cucho ap jwe. Rayo gen 1 viktwa nan 6 dènye match li yo.",
-     "rezilta": ""
+     "rezilta": "❌"
     },
     {
      "match": "Sunderland vs Tottenham",
@@ -269,7 +269,7 @@
       "n": 611
      },
      "nòt": "Malaga pa make anpil; Athletic manke Guruzeta.",
-     "rezilta": ""
+     "rezilta": "❌"
     },
     {
      "match": "Como vs Juventus",
@@ -305,7 +305,7 @@
       "n": 105
      },
      "nòt": "Leeds gen tout jwè li yo.",
-     "rezilta": ""
+     "rezilta": "✅"
     },
     {
      "match": "Cagliari vs Milan",
@@ -377,7 +377,7 @@
       "n": 273
      },
      "nòt": "Cucho titilè; Rayo an difikilte.",
-     "rezilta": ""
+     "rezilta": "❌"
     },
     {
      "match": "Sunderland vs Tottenham",
@@ -449,7 +449,7 @@
       "n": 273
      },
      "nòt": "Becker ak Tietz disponib; Union manke 7 jwè.",
-     "rezilta": ""
+     "rezilta": "✅"
     },
     {
      "match": "Espanol vs Getafe",
@@ -530,11 +530,15 @@
   }
  ],
  "retire": [],
- "rezime": "Nou verifye 17 seleksyon yo ak dènye nouvèl yo (blesi, woulman apre Ewòp, enpòtans match yo): pa gen youn ki kontredi klèman, kidonk nou pa retire anyen. Seleksyon ki pi fèb la se Brighton make (anpil atakan blese). Nou pa jwenn okenn alèt move tan pou wikenn nan.",
+ "rezime": "De konbinezon yo pèdi: Malaga-Athletic fini 3-4 (Under 4.5 tonbe) e Betis pa make kont Rayo (0-1). Leeds (3-0) ak Mainz (2-1) pase. Dapre règ yo, nou pa ranplase rès seleksyon yo pou sove konbinezon yo; nou ap kontinye mete rezilta yo.",
  "istwa": [
   {
    "lè": "27/11/2026 14:41 UTC",
    "chanjman": "Premye vèsyon verifye"
+  },
+  {
+   "lè": "28/11/2026 17:51 UTC",
+   "chanjman": "Rezilta mete ajou (samdi 28/11, 17:45 UTC): Leeds-Coventry 3-0 ✅, Mainz-Union 2-1 ✅, Malaga-Athletic 3-4 ❌ (7 gòl), Betis-Rayo 0-1 ❌. Pa gen seleksyon ki chanje."
   }
  ]
 }
